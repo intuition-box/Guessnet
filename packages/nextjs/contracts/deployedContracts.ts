@@ -4,6 +4,3172 @@
  */
 import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
-const deployedContracts = {} as const;
+const deployedContracts = {
+  31337: {
+    PredictionMarket: {
+      address: "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+      abi: [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_liquidityProvider",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_oracle",
+              type: "address",
+            },
+            {
+              internalType: "string",
+              name: "_question",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "_initialTokenValue",
+              type: "uint256",
+            },
+            {
+              internalType: "uint8",
+              name: "_initialYesProbability",
+              type: "uint8",
+            },
+            {
+              internalType: "uint8",
+              name: "_percentageToLock",
+              type: "uint8",
+            },
+          ],
+          stateMutability: "payable",
+          type: "constructor",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+          ],
+          name: "OwnableInvalidOwner",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "OwnableUnauthorizedAccount",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarket__AmountMustBeGreaterThanZero",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarket__ETHTransferFailed",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_tradingAmount",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "_allowance",
+              type: "uint256",
+            },
+          ],
+          name: "PredictionMarket__InsufficientAllowance",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_tradingAmount",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "_userBalance",
+              type: "uint256",
+            },
+          ],
+          name: "PredictionMarket__InsufficientBalance",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarket__InsufficientLiquidity",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "enum PredictionMarket.Outcome",
+              name: "_outcome",
+              type: "uint8",
+            },
+            {
+              internalType: "uint256",
+              name: "_amountToken",
+              type: "uint256",
+            },
+          ],
+          name: "PredictionMarket__InsufficientTokenReserve",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarket__InsufficientWinningTokens",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarket__InvalidPercentageToLock",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarket__InvalidProbability",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarket__MustProvideETHForInitialLiquidity",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarket__MustSendExactETHAmount",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarket__OnlyOracleCanReport",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarket__OwnerCannotCall",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarket__PredictionAlreadyReported",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarket__PredictionNotReported",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarket__TokenTransferFailed",
+          type: "error",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "provider",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "ethAmount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "tokensAmount",
+              type: "uint256",
+            },
+          ],
+          name: "LiquidityAdded",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "provider",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "ethAmount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "tokensAmount",
+              type: "uint256",
+            },
+          ],
+          name: "LiquidityRemoved",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "oracle",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "enum PredictionMarket.Outcome",
+              name: "winningOutcome",
+              type: "uint8",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "winningToken",
+              type: "address",
+            },
+          ],
+          name: "MarketReported",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "resolver",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "totalEthToSend",
+              type: "uint256",
+            },
+          ],
+          name: "MarketResolved",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "previousOwner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "OwnershipTransferred",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "buyer",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "enum PredictionMarket.Outcome",
+              name: "outcome",
+              type: "uint8",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "ethAmount",
+              type: "uint256",
+            },
+          ],
+          name: "TokensPurchased",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "seller",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "enum PredictionMarket.Outcome",
+              name: "outcome",
+              type: "uint8",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "ethAmount",
+              type: "uint256",
+            },
+          ],
+          name: "TokensSold",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "redeemer",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "ethAmount",
+              type: "uint256",
+            },
+          ],
+          name: "WinningTokensRedeemed",
+          type: "event",
+        },
+        {
+          inputs: [],
+          name: "addLiquidity",
+          outputs: [],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "enum PredictionMarket.Outcome",
+              name: "_outcome",
+              type: "uint8",
+            },
+            {
+              internalType: "uint256",
+              name: "_amountTokenToBuy",
+              type: "uint256",
+            },
+          ],
+          name: "buyTokensWithETH",
+          outputs: [],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "claimLpRewards",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "enum PredictionMarket.Outcome",
+              name: "_outcome",
+              type: "uint8",
+            },
+            {
+              internalType: "uint256",
+              name: "_tradingAmount",
+              type: "uint256",
+            },
+          ],
+          name: "getBuyPriceInEth",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getPrediction",
+          outputs: [
+            {
+              internalType: "string",
+              name: "question",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "outcome1",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "outcome2",
+              type: "string",
+            },
+            {
+              internalType: "address",
+              name: "oracle",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "initialTokenValue",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "yesTokenReserve",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "noTokenReserve",
+              type: "uint256",
+            },
+            {
+              internalType: "bool",
+              name: "isReported",
+              type: "bool",
+            },
+            {
+              internalType: "address",
+              name: "yesToken",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "noToken",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "winningToken",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "ethCollateral",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "lpTradingRevenue",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "predictionMarketOwner",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "initialProbability",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "percentageLocked",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "enum PredictionMarket.Outcome",
+              name: "_outcome",
+              type: "uint8",
+            },
+            {
+              internalType: "uint256",
+              name: "_tradingAmount",
+              type: "uint256",
+            },
+          ],
+          name: "getSellPriceInEth",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "i_initialTokenValue",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "i_initialYesProbability",
+          outputs: [
+            {
+              internalType: "uint8",
+              name: "",
+              type: "uint8",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "i_noToken",
+          outputs: [
+            {
+              internalType: "contract PredictionMarketToken",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "i_oracle",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "i_percentageLocked",
+          outputs: [
+            {
+              internalType: "uint8",
+              name: "",
+              type: "uint8",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "i_percentageToLock",
+          outputs: [
+            {
+              internalType: "uint8",
+              name: "",
+              type: "uint8",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "i_yesToken",
+          outputs: [
+            {
+              internalType: "contract PredictionMarketToken",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_amount",
+              type: "uint256",
+            },
+          ],
+          name: "redeemWinningTokens",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_ethToWithdraw",
+              type: "uint256",
+            },
+          ],
+          name: "removeLiquidity",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "renounceOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "enum PredictionMarket.Outcome",
+              name: "_winningOutcome",
+              type: "uint8",
+            },
+          ],
+          name: "report",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "resolveMarketAndWithdraw",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "ethRedeemed",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "s_ethCollateral",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "s_isReported",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "s_lpContributions",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "s_lpTradingRevenue",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "s_question",
+          outputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "s_totalLpContributions",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "s_winningToken",
+          outputs: [
+            {
+              internalType: "contract PredictionMarketToken",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "enum PredictionMarket.Outcome",
+              name: "_outcome",
+              type: "uint8",
+            },
+            {
+              internalType: "uint256",
+              name: "_tradingAmount",
+              type: "uint256",
+            },
+          ],
+          name: "sellTokensForEth",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "transferOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {
+        owner: "@openzeppelin/contracts/access/Ownable.sol",
+        renounceOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+        transferOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+      },
+    },
+    PredictionMarketFactory: {
+      address: "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+      abi: [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_defaultOracle",
+              type: "address",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+          ],
+          name: "OwnableInvalidOwner",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "OwnableUnauthorizedAccount",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarketFactory__EmptyDescription",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarketFactory__InvalidDeadline",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarketFactory__InvalidOracleAddress",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarketFactory__InvalidThreshold",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarketFactory__MarketCreationFailed",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarketFactory__MarketNotFound",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "ReentrancyGuardReentrantCall",
+          type: "error",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "oldOracle",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "newOracle",
+              type: "address",
+            },
+          ],
+          name: "DefaultOracleUpdated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "marketAddress",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "creator",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "oracle",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "string",
+              name: "description",
+              type: "string",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "transactionThreshold",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "deadline",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "marketIndex",
+              type: "uint256",
+            },
+          ],
+          name: "MarketCreated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "marketAddress",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "actualTransactionCount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "timestamp",
+              type: "uint256",
+            },
+          ],
+          name: "MarketResolved",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "marketAddress",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "bool",
+              name: "isActive",
+              type: "bool",
+            },
+          ],
+          name: "MarketStatusUpdated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "previousOwner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "OwnershipTransferred",
+          type: "event",
+        },
+        {
+          inputs: [],
+          name: "MAX_MARKET_DURATION",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "MAX_TRANSACTION_THRESHOLD",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "MIN_MARKET_DURATION",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "MIN_TRANSACTION_THRESHOLD",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "activeMarketsCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string[]",
+              name: "_descriptions",
+              type: "string[]",
+            },
+            {
+              internalType: "uint256[]",
+              name: "_thresholds",
+              type: "uint256[]",
+            },
+            {
+              internalType: "uint256[]",
+              name: "_deadlines",
+              type: "uint256[]",
+            },
+            {
+              internalType: "address",
+              name: "_oracle",
+              type: "address",
+            },
+          ],
+          name: "batchCreateMarkets",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "marketAddresses",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "_description",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "_transactionThreshold",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "_deadline",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "_customOracle",
+              type: "address",
+            },
+          ],
+          name: "createTransactionMarket",
+          outputs: [
+            {
+              internalType: "address",
+              name: "marketAddress",
+              type: "address",
+            },
+          ],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "creatorToMarkets",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "defaultOracle",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "deployedMarkets",
+          outputs: [
+            {
+              internalType: "contract TransactionPredictionMarket",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getActiveMarkets",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "activeMarkets",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getAllMarkets",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "marketAddresses",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getFactoryStats",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "totalMarkets",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "activeMarkets",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "resolvedMarkets",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "factoryDefaultOracle",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_marketIndex",
+              type: "uint256",
+            },
+          ],
+          name: "getMarketInfo",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "address",
+                  name: "marketAddress",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "creator",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "oracle",
+                  type: "address",
+                },
+                {
+                  internalType: "string",
+                  name: "description",
+                  type: "string",
+                },
+                {
+                  internalType: "uint256",
+                  name: "transactionThreshold",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "deadline",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "createdAt",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bool",
+                  name: "isActive",
+                  type: "bool",
+                },
+              ],
+              internalType: "struct PredictionMarketFactory.MarketInfo",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_marketAddress",
+              type: "address",
+            },
+          ],
+          name: "getMarketInfoByAddress",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "address",
+                  name: "marketAddress",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "creator",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "oracle",
+                  type: "address",
+                },
+                {
+                  internalType: "string",
+                  name: "description",
+                  type: "string",
+                },
+                {
+                  internalType: "uint256",
+                  name: "transactionThreshold",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "deadline",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "createdAt",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bool",
+                  name: "isActive",
+                  type: "bool",
+                },
+              ],
+              internalType: "struct PredictionMarketFactory.MarketInfo",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_creator",
+              type: "address",
+            },
+          ],
+          name: "getMarketsByCreator",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "marketAddresses",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_oracle",
+              type: "address",
+            },
+          ],
+          name: "getMarketsByOracle",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "marketAddresses",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getMarketsCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_offset",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "_limit",
+              type: "uint256",
+            },
+          ],
+          name: "getPaginatedMarkets",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "marketAddresses",
+              type: "address[]",
+            },
+            {
+              internalType: "uint256",
+              name: "totalCount",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getResolvableMarkets",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "resolvableMarkets",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_marketAddress",
+              type: "address",
+            },
+          ],
+          name: "isDeployedMarket",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "marketToIndex",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_marketAddress",
+              type: "address",
+            },
+          ],
+          name: "notifyMarketResolved",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "oracleToMarkets",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "renounceOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "totalMarketsCreated",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "transferOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_newDefaultOracle",
+              type: "address",
+            },
+          ],
+          name: "updateDefaultOracle",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {
+        owner: "@openzeppelin/contracts/access/Ownable.sol",
+        renounceOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+        transferOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+      },
+    },
+    PredictionMarketOracle: {
+      address: "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+      abi: [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_factory",
+              type: "address",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [],
+          name: "Oracle__DistributionFailed",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "Oracle__EmptyMarketsList",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "Oracle__InvalidMarketAddress",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "Oracle__InvalidTransactionData",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "Oracle__MarketAlreadyResolved",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "Oracle__MarketNotExpired",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "Oracle__OnlyAuthorizedResolver",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "Oracle__ResolverAlreadyExists",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "Oracle__ResolverNotFound",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+          ],
+          name: "OwnableInvalidOwner",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "OwnableUnauthorizedAccount",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "ReentrancyGuardReentrantCall",
+          type: "error",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "marketAddress",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "totalDistributed",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "winnersCount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "distributionTimestamp",
+              type: "uint256",
+            },
+          ],
+          name: "DistributionCompleted",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "marketAddress",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "finalTransactionCount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "enum TransactionPredictionMarket.BetType",
+              name: "winningType",
+              type: "uint8",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "resolutionTimestamp",
+              type: "uint256",
+            },
+          ],
+          name: "MarketClosed",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "previousOwner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "OwnershipTransferred",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "resolver",
+              type: "address",
+            },
+          ],
+          name: "ResolverAdded",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "resolver",
+              type: "address",
+            },
+          ],
+          name: "ResolverRemoved",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "marketAddress",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "threshold",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "actualTransactions",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "bool",
+              name: "isAboveThreshold",
+              type: "bool",
+            },
+          ],
+          name: "ResultValidated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "totalTransactions",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "timestamp",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "resolver",
+              type: "address",
+            },
+          ],
+          name: "TransactionDataUpdated",
+          type: "event",
+        },
+        {
+          inputs: [],
+          name: "MAX_DATA_AGE",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "MIN_RESOLUTION_DELAY",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "resolver",
+              type: "address",
+            },
+          ],
+          name: "addResolver",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "authorizedResolvers",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "marketAddress",
+              type: "address",
+            },
+          ],
+          name: "canResolveMarket",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "closeAllExpiredMarkets",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "marketAddress",
+              type: "address",
+            },
+          ],
+          name: "closeExpiredMarket",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address[]",
+              name: "marketAddresses",
+              type: "address[]",
+            },
+          ],
+          name: "closeMultipleExpiredMarkets",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "currentTransactionData",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "totalTransactions",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "timestamp",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "blockNumber",
+              type: "uint256",
+            },
+            {
+              internalType: "bool",
+              name: "isValid",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "factory",
+          outputs: [
+            {
+              internalType: "contract PredictionMarketFactory",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getAuthorizedResolvers",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getCurrentTransactionData",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "totalTransactions",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "timestamp",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "blockNumber",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bool",
+                  name: "isValid",
+                  type: "bool",
+                },
+              ],
+              internalType: "struct PredictionMarketOracle.TransactionData",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "marketAddress",
+              type: "address",
+            },
+          ],
+          name: "getMarketResolution",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "bool",
+                  name: "isResolved",
+                  type: "bool",
+                },
+                {
+                  internalType: "uint256",
+                  name: "resolutionTimestamp",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "finalTransactionCount",
+                  type: "uint256",
+                },
+                {
+                  internalType: "enum TransactionPredictionMarket.BetType",
+                  name: "winningType",
+                  type: "uint8",
+                },
+              ],
+              internalType: "struct PredictionMarketOracle.MarketResolution",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getOracleStats",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "totalResolved",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "totalDistributed",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "activeResolvers",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getResolvableMarkets",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "isDataFresh",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "marketResolutions",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "isResolved",
+              type: "bool",
+            },
+            {
+              internalType: "uint256",
+              name: "resolutionTimestamp",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "finalTransactionCount",
+              type: "uint256",
+            },
+            {
+              internalType: "enum TransactionPredictionMarket.BetType",
+              name: "winningType",
+              type: "uint8",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "resolver",
+              type: "address",
+            },
+          ],
+          name: "removeResolver",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "renounceOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "resolversList",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "totalFundsDistributed",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "totalMarketsResolved",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "transferOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_totalTransactions",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "_timestamp",
+              type: "uint256",
+            },
+          ],
+          name: "updateTransactionData",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {
+        owner: "@openzeppelin/contracts/access/Ownable.sol",
+        renounceOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+        transferOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+      },
+    },
+    PredictionMarketTokenNo: {
+      address: "0x3Ca8f9C04c7e3E1624Ac2008F92f6F366A869444",
+      abi: [
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "name",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "symbol",
+              type: "string",
+            },
+            {
+              internalType: "address",
+              name: "_liquidityProvider",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "initialSupply",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "allowance",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "needed",
+              type: "uint256",
+            },
+          ],
+          name: "ERC20InsufficientAllowance",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "sender",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "balance",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "needed",
+              type: "uint256",
+            },
+          ],
+          name: "ERC20InsufficientBalance",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "approver",
+              type: "address",
+            },
+          ],
+          name: "ERC20InvalidApprover",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "receiver",
+              type: "address",
+            },
+          ],
+          name: "ERC20InvalidReceiver",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "sender",
+              type: "address",
+            },
+          ],
+          name: "ERC20InvalidSender",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+          ],
+          name: "ERC20InvalidSpender",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarketToken__LiquidityProviderCantTransfer",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarketToken__OnlyPredictionMarketCanBurn",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarketToken__OnlyPredictionMarketCanMint",
+          type: "error",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+          ],
+          name: "Approval",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "from",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+          ],
+          name: "Transfer",
+          type: "event",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+          ],
+          name: "allowance",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+          ],
+          name: "approve",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "balanceOf",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "from",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "burn",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "decimals",
+          outputs: [
+            {
+              internalType: "uint8",
+              name: "",
+              type: "uint8",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "liquidityProvider",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "mint",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "name",
+          outputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "predictionMarket",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "symbol",
+          outputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "totalSupply",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "transfer",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "from",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "transferFrom",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {},
+    },
+    PredictionMarketTokenYes: {
+      address: "0x8dAF17A20c9DBA35f005b6324F493785D239719d",
+      abi: [
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "name",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "symbol",
+              type: "string",
+            },
+            {
+              internalType: "address",
+              name: "_liquidityProvider",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "initialSupply",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "allowance",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "needed",
+              type: "uint256",
+            },
+          ],
+          name: "ERC20InsufficientAllowance",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "sender",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "balance",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "needed",
+              type: "uint256",
+            },
+          ],
+          name: "ERC20InsufficientBalance",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "approver",
+              type: "address",
+            },
+          ],
+          name: "ERC20InvalidApprover",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "receiver",
+              type: "address",
+            },
+          ],
+          name: "ERC20InvalidReceiver",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "sender",
+              type: "address",
+            },
+          ],
+          name: "ERC20InvalidSender",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+          ],
+          name: "ERC20InvalidSpender",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarketToken__LiquidityProviderCantTransfer",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarketToken__OnlyPredictionMarketCanBurn",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "PredictionMarketToken__OnlyPredictionMarketCanMint",
+          type: "error",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+          ],
+          name: "Approval",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "from",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+          ],
+          name: "Transfer",
+          type: "event",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+          ],
+          name: "allowance",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "spender",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+          ],
+          name: "approve",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "balanceOf",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "from",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "burn",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "decimals",
+          outputs: [
+            {
+              internalType: "uint8",
+              name: "",
+              type: "uint8",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "liquidityProvider",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "mint",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "name",
+          outputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "predictionMarket",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "symbol",
+          outputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "totalSupply",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "transfer",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "from",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "transferFrom",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {},
+    },
+  },
+} as const;
 
 export default deployedContracts satisfies GenericContractsDeclaration;

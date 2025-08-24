@@ -28,8 +28,9 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   const initialTokenValue = ethers.parseEther("0.01");
   const initialProbability = 50;
   const percentageLocked = 10;
-  const liquidityProvider = deployer;
-  const oracle = deployer;
+  // const liquidityProvider = deployer;
+  const liquidityProvider = "0x2Afb79E9FA766D4a923a4aa72ed5d1e16C6B1063";
+  const oracle = "0x2Afb79E9FA766D4a923a4aa72ed5d1e16C6B1063";
 
   await deploy("PredictionMarket", {
     from: deployer,
@@ -74,4 +75,5 @@ export default deployYourContract;
 
 // Tags are useful if you have multiple deploy files and only want to run one of them.
 // e.g. yarn deploy --tags YourContract
-deployYourContract.tags = ["PredictionMarket"];
+// DÉSACTIVÉ - Utilise uniquement le nouveau système Factory/Oracle
+// deployYourContract.tags = ["PredictionMarket"];

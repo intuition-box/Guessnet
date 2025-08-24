@@ -1,0 +1,150 @@
+🚀 GUIDE DE REDÉMARRAGE COMPLET - Prediction Markets
+=======================================================
+
+⚠️  PROBLÈME IDENTIFIÉ:
+- Node Hardhat bloqué → transactions timeout infini
+- Pop-ups "creating market" et "placing bet" qui tournent à l'infini
+- 0 ETH affiché dans les marchés
+- Pas de données Oracle
+- Aucune transaction visible dans block explorer
+
+🛑 ÉTAPE 1: ARRÊTER TOUS LES SERVICES
+====================================
+
+Dans tes terminaux actuels, arrête tout avec Ctrl+C:
+- Terminal Hardhat node
+- Terminal Next.js frontend  
+- Terminal Oracle service (déjà arrêté)
+
+🚀 ÉTAPE 2: REDÉMARRAGE DANS L'ORDRE
+===================================
+
+
+📍 TERMINAL 1 - Démarrer le node Hardhat:
+-----------------------------------------
+cd packages/hardhat
+yarn hardhat node --network hardhat
+
+⏳ Attends que ce message apparaisse:
+"Started HTTP and WebSocket JSON-RPC server at http://127.0.0.1:8545/"
+
+
+📍 TERMINAL 2 - Redéployer les contrats:
+---------------------------------------
+cd packages/hardhat  
+yarn deploy
+
+🔍 TRÈS IMPORTANT - Noter les adresses affichées:
+✅ Factory deployed to: 0x...
+✅ Oracle deployed to: 0x...
+
+📝 COPIE CES ADRESSES - tu en auras besoin pour l'étape 4!
+
+
+📍 TERMINAL 3 - Redémarrer le frontend:
+--------------------------------------
+cd packages/nextjs
+yarn dev
+
+Vérifie que ça démarre sur http://localhost:3001 ou http://localhost:3000
+
+
+📍 TERMINAL 4 - Démarrer l'Oracle service:
+-----------------------------------------
+cd packages/hardhat
+
+⚠️  REMPLACE LES ADRESSES EXACTEMENT ICI:
+
+1️⃣ TROUVE ces lignes dans la sortie de "yarn deploy" (ÉTAPE 2):
+   ✅ Oracle deployed to: 0xADRESSE_ORACLE_COMPLÈTE
+   ✅ Factory's default oracle updated to: 0xADRESSE_ORACLE_COMPLÈTE
+   📈 PredictionMarketFactory deployed to: 0xADRESSE_FACTORY_COMPLÈTE
+
+2️⃣ COPIE-COLLE et REMPLACE dans cette commande:
+
+ORACLE_CONTRACT_ADDRESS=0xADRESSE_ORACLE_COMPLÈTE FACTORY_CONTRACT_ADDRESS=0xADRESSE_FACTORY_COMPLÈTE yarn hardhat run scripts/oracle-service.ts
+
+🔄 EXEMPLE CONCRET (tes adresses seront différentes):
+Si tu vois:
+   ✅ Oracle deployed to: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
+   📈 PredictionMarketFactory deployed to: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+
+Alors tape EXACTEMENT:
+ORACLE_CONTRACT_ADDRESS=0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 FACTORY_CONTRACT_ADDRESS=0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 yarn hardhat run scripts/oracle-service.ts
+
+
+
+✅ VÉRIFICATION QUE TOUT FONCTIONNE
+==================================
+
+1. 🌐 Va sur http://localhost:3001/prediction-markets
+   - Le compteur de transactions doit se mettre à jour en temps réel
+   - Les boutons +1h, +2h, +5h, +12h doivent fonctionner
+
+2. 📈 Crée un nouveau marché:
+   - Choisis un threshold (ex: 2,500,000)  
+   - Clique sur +2h pour la durée
+   - Clique "🚀 Create Market"
+   - LE POP-UP NE DOIT PLUS TOURNER À L'INFINI
+
+3. 💰 Place un pari:
+   - Sélectionne le marché créé
+   - Entre un montant (ex: 0.1)
+   - Choisis ABOVE ou BELOW
+   - Clique "Place Bet"
+   - LE POP-UP NE DOIT PLUS TOURNER À L'INFINI
+
+4. 🔮 Va sur http://localhost:3001/oracle
+   - Tu dois maintenant voir:
+     📈 Data Validation
+     🔮 Oracle: [NOMBRE] transactions | [DATE] | Valid
+     🌐 Live API: [NOMBRE] transactions | [DATE] | Connected
+
+5. 🏪 Retourne sur les markets - tu dois voir:
+   - Le montant d'ETH que tu as misé
+   - "Total Locked: 0.1 ETH" (ou ton montant)
+
+📋 RÉSOLUTION DES PROBLÈMES
+===========================
+
+❌ Si "Create Market" tourne toujours à l'infini:
+→ Le node Hardhat n'est pas redémarré correctement
+→ Recommence l'étape 1 et 2
+
+❌ Si Oracle affiche toujours "No data":
+→ Les adresses dans TERMINAL 4 sont incorrectes
+→ Vérifie que tu as copié les bonnes adresses de l'étape 2
+
+❌ Si les transactions n'apparaissent pas dans block explorer:
+→ Va sur http://localhost:8545 pour vérifier que le node répond
+→ Redémarre complètement si nécessaire
+
+✅ APRÈS REDÉMARRAGE RÉUSSI
+===========================
+
+Tu devrais avoir:
+- ✅ Transactions validées instantanément
+- ✅ ETH correctement affichés dans les marchés  
+- ✅ Oracle avec vraies données temps réel
+- ✅ Betting et création de marchés fonctionnels
+- ✅ Pas de pop-ups infinis
+- ✅ Block explorer avec transactions visibles
+
+🎯 RAPPEL DES ADRESSES À SAUVEGARDER
+===================================
+
+Après yarn deploy, SAUVEGARDE ces adresses:
+- Factory: 0x...
+- Oracle: 0x...
+
+Tu en auras besoin pour l'Oracle service!
+
+📞 AIDE
+=======
+
+Si tu as encore des problèmes après ce redémarrage:
+1. Partage-moi les messages d'erreur exacts
+2. Dis-moi à quelle étape ça bloque
+3. Partage les nouvelles adresses de contrats
+
+Bonne chance! 🚀

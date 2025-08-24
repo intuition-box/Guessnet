@@ -1,0 +1,18 @@
+╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ✻ Welcome to Claude Code!                                                                      │
+│                                                                                                │
+│   /help for help, /status for your current setup                                               │
+│                                                                                                │
+│   cwd: /home/samuel_chauche/THP/Speedrun/ChartIntu/intuitionpredictionmarket/packages/hardhat  │
+╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+● Compact summary (ctrl+r to expand)
+  ⎿  Read ../nextjs/app/prediction-markets/page.tsx (427 lines)
+  ⎿  Read contracts/PredictionMarketFactory.sol (542 lines)
+  ⎿  Read deploy/01_deploy_factory.ts (56 lines)
+  ⎿  5-hour limit reached ∙ resets 12am
+     /upgrade to increase your usage limit.
+
+> what ?
+  ⎿  5-hour limit reached ∙ resets 12am
+     /upgrade to increase your usage limit.
+

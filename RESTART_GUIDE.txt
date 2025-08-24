@@ -40,6 +40,9 @@ yarn deploy
 
 📝 COPIE CES ADRESSES - tu en auras besoin pour l'étape 4!
 
+🆕 REMARQUE 2024: Plus besoin de mettre à jour deployedContracts.ts!
+L'interface lit maintenant automatiquement tous les marchés créés via getAllMarkets().
+
 
 📍 TERMINAL 3 - Redémarrer le frontend:
 --------------------------------------
@@ -88,11 +91,12 @@ ORACLE_CONTRACT_ADDRESS=0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 FACTORY_CONTR
    - LE POP-UP NE DOIT PLUS TOURNER À L'INFINI
 
 3. 💰 Place un pari:
-   - Sélectionne le marché créé
+   - Sélectionne le marché créé (n'importe lequel fonctionne maintenant!)
    - Entre un montant (ex: 0.1)
    - Choisis ABOVE ou BELOW
-   - Clique "Place Bet"
+   - Clique "🎯 Place Real Bet (Any Market)" 
    - LE POP-UP NE DOIT PLUS TOURNER À L'INFINI
+   - Message de succès: "🎯 Real bet placed: X ETH on ABOVE/BELOW threshold!"
 
 4. 🔮 Va sur http://localhost:3001/oracle
    - Tu dois maintenant voir:
@@ -101,8 +105,11 @@ ORACLE_CONTRACT_ADDRESS=0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 FACTORY_CONTR
      🌐 Live API: [NOMBRE] transactions | [DATE] | Connected
 
 5. 🏪 Retourne sur les markets - tu dois voir:
+   - L'adresse réelle du marché (0xCAFac3dd18ac6c6e92c921884f9e4176737c052c...)
+   - "✅ Real data from factory contract" si les données sont validées
    - Le montant d'ETH que tu as misé
    - "Total Locked: 0.1 ETH" (ou ton montant)
+   - "✅ Can bet on ANY TransactionPredictionMarket address!" dans l'interface de pari
 
 📋 RÉSOLUTION DES PROBLÈMES
 ===========================
@@ -119,8 +126,8 @@ ORACLE_CONTRACT_ADDRESS=0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 FACTORY_CONTR
 → Va sur http://localhost:8545 pour vérifier que le node répond
 → Redémarre complètement si nécessaire
 
-✅ APRÈS REDÉMARRAGE RÉUSSI
-===========================
+✅ APRÈS REDÉMARRAGE RÉUSSI (MISE À JOUR 2024)
+===============================================
 
 Tu devrais avoir:
 - ✅ Transactions validées instantanément
@@ -129,6 +136,14 @@ Tu devrais avoir:
 - ✅ Betting et création de marchés fonctionnels
 - ✅ Pas de pop-ups infinis
 - ✅ Block explorer avec transactions visibles
+
+🆕 NOUVELLES FONCTIONNALITÉS AJOUTÉES:
+- ✅ Interface lit automatiquement TOUS les marchés créés
+- ✅ Affichage des vraies adresses de contrats (0xCAFac3...)
+- ✅ "✅ Real data from factory contract" sur les marchés validés
+- ✅ Paris fonctionnels sur N'IMPORTE QUEL marché créé
+- ✅ Message "🎯 Real bet placed" pour les vraies transactions
+- ✅ Plus besoin de modifier deployedContracts.ts manuellement
 
 🎯 RAPPEL DES ADRESSES À SAUVEGARDER
 ===================================
@@ -146,5 +161,11 @@ Si tu as encore des problèmes après ce redémarrage:
 1. Partage-moi les messages d'erreur exacts
 2. Dis-moi à quelle étape ça bloque
 3. Partage les nouvelles adresses de contrats
+
+🆕 NOUVELLES FONCTIONNALITÉS 2024:
+- Interface améliorée avec vraies données blockchain
+- Paris sur tous les marchés sans configuration manuelle
+- Affichage en temps réel des adresses de contrats
+- Plus de limitations sur le nombre de marchés
 
 Bonne chance! 🚀

@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useScaffoldContract, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useState, useEffect, useCallback } from "react";
+import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { EtherInput } from "~~/components/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
-import { formatEther, parseEther } from "viem";
+import { formatEther, parseEther, Address } from "viem";  
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { MarketReader } from "./MarketReader";
+import { useWriteContract } from "wagmi";
+import { TRANSACTION_PREDICTION_MARKET_ABI } from "./contracts/TransactionPredictionMarketABI";
 
 interface Market {
   address: string;
@@ -55,37 +58,62 @@ export default function PredictionMarkets() {
   // Write contract functions
   const { writeContractAsync: createMarket } = useScaffoldWriteContract("PredictionMarketFactory");
 
+  // Hook to get market info from factory for first market as example
+  const firstMarketAddress = allMarkets?.[0] as Address | undefined;
+  const { data: factoryMarketInfo } = useScaffoldReadContract({
+    contractName: "PredictionMarketFactory",
+    functionName: "getMarketInfoByAddress",
+    args: firstMarketAddress ? [firstMarketAddress] : undefined,
+    enabled: !!firstMarketAddress
+  });
+
+  // Get market details using factory info
+  const getMarketDetails = async (marketAddress: string): Promise<Market | null> => {
+    try {
+      // Use the factory info if available, otherwise create placeholder
+      if (factoryMarketInfo && marketAddress === allMarkets?.[0]) {
+        return {
+          address: marketAddress,
+          description: factoryMarketInfo.description,
+          threshold: factoryMarketInfo.transactionThreshold,
+          deadline: factoryMarketInfo.deadline,
+          status: factoryMarketInfo.isActive ? 0 : 1,
+          totalValueLocked: BigInt(0), // This would need individual market contract call
+          aboveBets: BigInt(0),
+          belowBets: BigInt(0)
+        };
+      }
+      
+      return {
+        address: marketAddress,
+        description: `Transaction Market at ${marketAddress.slice(0, 10)}...`,
+        threshold: BigInt(2500000),
+        deadline: BigInt(Math.floor(Date.now() / 1000) + 7200), // 2 hours from now
+        status: 0,
+        totalValueLocked: BigInt(0),
+        aboveBets: BigInt(0), 
+        belowBets: BigInt(0)
+      };
+    } catch (error) {
+      console.error(`Error getting market details for ${marketAddress}:`, error);
+      return null;
+    }
+  };
+
   // Load real markets data when allMarkets changes
   useEffect(() => {
-    if (allMarkets && allMarkets.length > 0) {
-      const loadMarketDetails = async () => {
-        const marketDetails: Market[] = [];
-        
-        for (const marketAddress of allMarkets) {
-          try {
-            // For now, create basic market info
-            // In a real implementation, you'd call getMarketInfo on each market contract
-            const basicMarket: Market = {
-              address: marketAddress,
-              description: `Market at ${marketAddress.slice(0, 8)}...`,
-              threshold: BigInt(2500000), // Default threshold
-              deadline: BigInt(Math.floor(Date.now() / 1000) + 86400), // Default to 24h from now
-              status: 0, // Active
-              totalValueLocked: BigInt(0),
-              aboveBets: BigInt(0),
-              belowBets: BigInt(0)
-            };
-            marketDetails.push(basicMarket);
-          } catch (error) {
-            console.error(`Failed to load market ${marketAddress}:`, error);
-          }
-        }
-        
-        setMarkets(marketDetails);
-      };
+    const loadMarkets = async () => {
+      if (allMarkets && allMarkets.length > 0) {
+        const marketPromises = allMarkets.map(address => getMarketDetails(address));
+        const marketResults = await Promise.all(marketPromises);
+        const validMarkets = marketResults.filter((market): market is Market => market !== null);
+        setMarkets(validMarkets);
+      } else {
+        setMarkets([]);
+      }
+    };
 
-      loadMarketDetails();
-    }
+    loadMarkets();
   }, [allMarkets]);
 
   // Fetch API data for chart
@@ -182,6 +210,9 @@ export default function PredictionMarkets() {
     }
   };
 
+  // Write contract function for placing bets on ANY TransactionPredictionMarket
+  const { writeContractAsync } = useWriteContract();
+
   const placeBet = async () => {
     if (!selectedMarket || !betAmount) {
       notification.error("Please select a market and enter bet amount");
@@ -189,20 +220,37 @@ export default function PredictionMarkets() {
     }
 
     try {
-      // For now, show that betting would work with real contracts
       notification.loading("Placing bet...");
       
-      // Simulate transaction delay
+      console.log("Placing real bet with:", {
+        marketAddress: selectedMarket,
+        betType: betType, // 0 = ABOVE, 1 = BELOW
+        amount: betAmount,
+        value: parseEther(betAmount)
+      });
+      
+      // Call the real placeBet function on ANY TransactionPredictionMarket contract
+      // This works with any market address dynamically
+      await writeContractAsync({
+        address: selectedMarket as Address,
+        abi: TRANSACTION_PREDICTION_MARKET_ABI,
+        functionName: "placeBet",
+        args: [betType], // 0 for ABOVE_THRESHOLD, 1 for BELOW_THRESHOLD
+        value: parseEther(betAmount),
+      });
+      
+      notification.success(`🎯 Real bet placed: ${betAmount} ETH on ${betType === 0 ? 'ABOVE' : 'BELOW'} threshold!`);
+      setBetAmount("");
+      setSelectedMarket("");
+      
+      // Refresh markets after bet
       setTimeout(() => {
-        notification.success(`Bet placed: ${betAmount} ETH on ${betType === 0 ? 'ABOVE' : 'BELOW'} threshold`);
-        setBetAmount("");
-        
-        // Refresh markets after bet
         refetchMarkets();
-      }, 2000);
+      }, 3000);
       
     } catch (error: any) {
-      notification.error(`Failed to place bet: ${error.message}`);
+      console.error("Bet placement error:", error);
+      notification.error(`Failed to place bet: ${error.shortMessage || error.message || error}`);
     }
   };
 
@@ -214,8 +262,35 @@ export default function PredictionMarkets() {
     return parseInt(num).toLocaleString();
   };
 
+  // Callback pour recevoir les données des marchés
+  const handleMarketData = useCallback((marketData: any) => {
+    setMarkets(prev => {
+      const filtered = prev.filter(m => m.address !== marketData.address);
+      const newMarket: Market = {
+        address: marketData.address,
+        description: marketData.description || `Market ${marketData.address.slice(0, 8)}...`,
+        threshold: marketData.threshold || BigInt(0),
+        deadline: marketData.deadline || BigInt(0),
+        status: marketData.status || 0,
+        totalValueLocked: marketData.totalValueLocked || BigInt(0),
+        aboveBets: marketData.aboveBets || BigInt(0),
+        belowBets: marketData.belowBets || BigInt(0)
+      };
+      return [...filtered, newMarket];
+    });
+  }, []);
+
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Composants pour lire les données de chaque marché */}
+      {allMarkets?.map((marketAddress) => (
+        <MarketReader 
+          key={marketAddress} 
+          marketAddress={marketAddress as Address}
+          onMarketData={handleMarketData}
+        />
+      ))}
+      
       <h1 className="text-4xl font-bold text-center mb-8">
         🔮 Prediction Markets - Intuition Blockchain
       </h1>
@@ -377,11 +452,14 @@ export default function PredictionMarkets() {
                 onChange={(e) => setSelectedMarket(e.target.value)}
               >
                 <option value="">Choose a market...</option>
-                {markets.map((market, idx) => (
-                  <option key={idx} value={market.address}>
-                    Threshold: {formatLargeNumber(market.threshold.toString())}
-                  </option>
-                ))}
+                {allMarkets?.map((marketAddress, idx) => {
+                  const market = markets.find(m => m.address === marketAddress);
+                  return (
+                    <option key={idx} value={marketAddress}>
+                      {market ? `Threshold: ${formatLargeNumber(market.threshold.toString())}` : `Market ${marketAddress.slice(0, 8)}...`}
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
@@ -422,8 +500,15 @@ export default function PredictionMarkets() {
             onClick={placeBet}
             disabled={!selectedMarket || !betAmount}
           >
-            🎲 Place Bet
+            🎯 Place Real Bet (Any Market)
           </button>
+          
+          <div className="alert alert-success mt-2">
+            <div className="flex items-center gap-2">
+              <span>✅</span>
+              <span className="text-sm">Can bet on ANY TransactionPredictionMarket address!</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -432,7 +517,7 @@ export default function PredictionMarkets() {
         <div className="card-body">
           <h2 className="card-title text-2xl mb-4">🏪 Active Markets</h2>
           
-          {markets.length === 0 ? (
+          {!allMarkets || allMarkets.length === 0 ? (
             <div className="alert alert-info">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -441,34 +526,46 @@ export default function PredictionMarkets() {
             </div>
           ) : (
             <div className="grid gap-4">
-              {markets.map((market, idx) => (
-                <div key={idx} className="card bg-base-200 shadow">
-                  <div className="card-body p-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="font-semibold">{market.description}</h3>
-                        <p className="text-sm opacity-70">
-                          Threshold: {formatLargeNumber(market.threshold.toString())} | 
-                          Ends: {new Date(Number(market.deadline) * 1000).toLocaleString()}
-                        </p>
+              {allMarkets.map((marketAddress, idx) => {
+                const market = markets.find(m => m.address === marketAddress);
+                return (
+                  <div key={idx} className="card bg-base-200 shadow">
+                    <div className="card-body p-4">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="font-semibold">
+                            {market?.description || `Market at ${marketAddress.slice(0, 10)}...`}
+                          </h3>
+                          <p className="text-sm opacity-70">
+                            Market at {marketAddress.slice(0, 10)}... |
+                            Threshold: {market ? formatLargeNumber(market.threshold.toString()) : '2,500,000'} | 
+                            Ends: {market ? new Date(Number(market.deadline) * 1000).toLocaleString() : 'Loading...'}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold">{market ? formatEther(market.totalValueLocked) : '0'} ETH</p>
+                          <p className="text-xs opacity-70">Total Locked</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold">{formatEther(market.totalValueLocked)} ETH</p>
-                        <p className="text-xs opacity-70">Total Locked</p>
+                      
+                      <div className="flex gap-2 mt-2">
+                        <div className="badge badge-success">
+                          ABOVE: {market ? formatEther(market.aboveBets) : '0'} ETH
+                        </div>
+                        <div className="badge badge-error">
+                          BELOW: {market ? formatEther(market.belowBets) : '0'} ETH
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex gap-2 mt-2">
-                      <div className="badge badge-success">
-                        ABOVE: {formatEther(market.aboveBets)} ETH
-                      </div>
-                      <div className="badge badge-error">
-                        BELOW: {formatEther(market.belowBets)} ETH
-                      </div>
+                      
+                      {factoryMarketInfo && marketAddress === firstMarketAddress && (
+                        <div className="mt-2 p-2 bg-base-300 rounded">
+                          <p className="text-xs text-success">✅ Real data from factory contract</p>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

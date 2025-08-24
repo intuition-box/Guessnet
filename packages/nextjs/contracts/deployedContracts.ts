@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     PredictionMarket: {
-      address: "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
       abi: [
         {
           inputs: [
@@ -847,7 +847,7 @@ const deployedContracts = {
       },
     },
     PredictionMarketFactory: {
-      address: "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
+      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
       abi: [
         {
           inputs: [
@@ -1648,7 +1648,7 @@ const deployedContracts = {
       },
     },
     PredictionMarketOracle: {
-      address: "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+      address: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
       abi: [
         {
           inputs: [
@@ -2336,7 +2336,7 @@ const deployedContracts = {
       },
     },
     PredictionMarketTokenNo: {
-      address: "0x3Ca8f9C04c7e3E1624Ac2008F92f6F366A869444",
+      address: "0xB7A5bd0345EF1Cc5E66bf61BdeC17D2461fBd968",
       abi: [
         {
           inputs: [
@@ -2753,7 +2753,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     PredictionMarketTokenYes: {
-      address: "0x8dAF17A20c9DBA35f005b6324F493785D239719d",
+      address: "0xa16E02E87b7454126E5E10d957A927A7F5B5d2be",
       abi: [
         {
           inputs: [

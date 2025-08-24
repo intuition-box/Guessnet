@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { EtherInput } from "~~/components/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
+import deployedContracts from "~~/contracts/deployedContracts";
 import { formatEther, parseEther, Address } from "viem";  
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { MarketReader } from "./MarketReader";
@@ -67,53 +68,26 @@ export default function PredictionMarkets() {
     enabled: !!firstMarketAddress
   });
 
-  // Get market details using factory info
-  const getMarketDetails = async (marketAddress: string): Promise<Market | null> => {
-    try {
-      // Use the factory info if available, otherwise create placeholder
-      if (factoryMarketInfo && marketAddress === allMarkets?.[0]) {
-        return {
-          address: marketAddress,
-          description: factoryMarketInfo.description,
-          threshold: factoryMarketInfo.transactionThreshold,
-          deadline: factoryMarketInfo.deadline,
-          status: factoryMarketInfo.isActive ? 0 : 1,
-          totalValueLocked: BigInt(0), // This would need individual market contract call
-          aboveBets: BigInt(0),
-          belowBets: BigInt(0)
-        };
-      }
-      
-      return {
-        address: marketAddress,
-        description: `Transaction Market at ${marketAddress.slice(0, 10)}...`,
-        threshold: BigInt(2500000),
-        deadline: BigInt(Math.floor(Date.now() / 1000) + 7200), // 2 hours from now
-        status: 0,
-        totalValueLocked: BigInt(0),
-        aboveBets: BigInt(0), 
-        belowBets: BigInt(0)
-      };
-    } catch (error) {
-      console.error(`Error getting market details for ${marketAddress}:`, error);
-      return null;
-    }
-  };
+  // REMOVED: getMarketDetails function - we now use only real data from MarketReader components
+  // No more placeholder data, only real blockchain data
 
-  // Load real markets data when allMarkets changes
+  // Initialize empty markets array when allMarkets changes
+  // Real data will be populated by MarketReader components via handleMarketData callback
   useEffect(() => {
-    const loadMarkets = async () => {
-      if (allMarkets && allMarkets.length > 0) {
-        const marketPromises = allMarkets.map(address => getMarketDetails(address));
-        const marketResults = await Promise.all(marketPromises);
-        const validMarkets = marketResults.filter((market): market is Market => market !== null);
-        setMarkets(validMarkets);
-      } else {
-        setMarkets([]);
-      }
-    };
-
-    loadMarkets();
+    console.log("🔄 Markets from Factory changed...");
+    console.log("allMarkets from Factory:", allMarkets);
+    console.log("Deployed contracts:", deployedContracts);
+    const factoryAddress = deployedContracts?.[31337]?.PredictionMarketFactory?.address;
+    console.log("Factory address:", factoryAddress);
+    
+    if (allMarkets && allMarkets.length > 0) {
+      console.log(`📊 Found ${allMarkets.length} markets from Factory - waiting for MarketReader data...`);
+      // Clear markets, will be populated by MarketReader components
+      setMarkets([]);
+    } else {
+      console.log("⚠️ No markets from Factory - clearing market list");
+      setMarkets([]);
+    }
   }, [allMarkets]);
 
   // Fetch API data for chart
@@ -219,18 +193,34 @@ export default function PredictionMarkets() {
       return;
     }
 
+    // VALIDATION: Check if selected market is in allMarkets array from Factory
+    console.log("🔍 DEBUG - Validating market selection:");
+    console.log("Selected Market:", selectedMarket);
+    console.log("All Markets from Factory:", allMarkets);
+    const factoryAddress = deployedContracts?.[31337]?.PredictionMarketFactory?.address;
+    console.log("Factory Address:", factoryAddress);
+    
+    if (!allMarkets || !allMarkets.includes(selectedMarket)) {
+      console.error("❌ VALIDATION FAILED: Selected market not in Factory's market list!");
+      notification.error(`Invalid market selection. Market ${selectedMarket} is not in Factory's list.`);
+      return;
+    }
+
+    console.log("✅ VALIDATION PASSED: Market exists in Factory's list");
+
     try {
       notification.loading("Placing bet...");
       
-      console.log("Placing real bet with:", {
+      console.log("🎯 Placing real bet with VALIDATED market:", {
         marketAddress: selectedMarket,
         betType: betType, // 0 = ABOVE, 1 = BELOW
         amount: betAmount,
-        value: parseEther(betAmount)
+        value: parseEther(betAmount),
+        factoryMarkets: allMarkets,
+        isValidMarket: allMarkets?.includes(selectedMarket)
       });
       
-      // Call the real placeBet function on ANY TransactionPredictionMarket contract
-      // This works with any market address dynamically
+      // Call the real placeBet function on VALIDATED TransactionPredictionMarket contract
       await writeContractAsync({
         address: selectedMarket as Address,
         abi: TRANSACTION_PREDICTION_MARKET_ABI,
@@ -264,6 +254,15 @@ export default function PredictionMarkets() {
 
   // Callback pour recevoir les données des marchés
   const handleMarketData = useCallback((marketData: any) => {
+    console.log("📊 Real market data received:", {
+      address: marketData.address,
+      threshold: marketData.threshold?.toString(),
+      description: marketData.description,
+      totalValueLocked: marketData.totalValueLocked?.toString(),
+      aboveBets: marketData.aboveBets?.toString(),
+      belowBets: marketData.belowBets?.toString()
+    });
+    
     setMarkets(prev => {
       const filtered = prev.filter(m => m.address !== marketData.address);
       const newMarket: Market = {
@@ -276,6 +275,8 @@ export default function PredictionMarkets() {
         aboveBets: marketData.aboveBets || BigInt(0),
         belowBets: marketData.belowBets || BigInt(0)
       };
+      
+      console.log(`✅ Market updated: ${newMarket.address.slice(0, 10)}... - Threshold: ${newMarket.threshold.toString()}`);
       return [...filtered, newMarket];
     });
   }, []);
@@ -294,6 +295,43 @@ export default function PredictionMarkets() {
       <h1 className="text-4xl font-bold text-center mb-8">
         🔮 Prediction Markets - Intuition Blockchain
       </h1>
+
+      {/* Market Cache Management */}
+      <div className="card bg-base-100 shadow-xl mb-6">
+        <div className="card-body py-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="stats stats-vertical sm:stats-horizontal shadow">
+                <div className="stat">
+                  <div className="stat-title">Factory Markets</div>
+                  <div className="stat-value text-sm">{allMarkets?.length || 0}</div>
+                  <div className="stat-desc">From Factory Contract</div>
+                </div>
+                <div className="stat">
+                  <div className="stat-title">Loaded Markets</div>
+                  <div className="stat-value text-sm">{markets.length}</div>
+                  <div className="stat-desc">With Market Data</div>
+                </div>
+              </div>
+            </div>
+            
+            <button 
+              className="btn btn-outline btn-primary"
+              onClick={async () => {
+                console.log("🔄 Manual refresh triggered");
+                // Clear current markets
+                setMarkets([]);
+                setSelectedMarket("");
+                // Refetch from Factory
+                await refetchMarkets();
+                notification.info("Markets refreshed from Factory");
+              }}
+            >
+              🔄 Refresh Markets
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div className="grid lg:grid-cols-2 gap-8 mb-8">
         {/* Create Market Form */}
@@ -449,18 +487,36 @@ export default function PredictionMarkets() {
               <select 
                 className="select select-bordered"
                 value={selectedMarket}
-                onChange={(e) => setSelectedMarket(e.target.value)}
+                onChange={(e) => {
+                  console.log("🔄 Market selected:", e.target.value);
+                  console.log("🔍 Available markets from Factory:", allMarkets);
+                  setSelectedMarket(e.target.value);
+                }}
               >
                 <option value="">Choose a market...</option>
                 {allMarkets?.map((marketAddress, idx) => {
                   const market = markets.find(m => m.address === marketAddress);
                   return (
                     <option key={idx} value={marketAddress}>
-                      {market ? `Threshold: ${formatLargeNumber(market.threshold.toString())}` : `Market ${marketAddress.slice(0, 8)}...`}
+                      {market ? `Threshold: ${formatLargeNumber(market.threshold.toString())} (${marketAddress.slice(0, 10)}...)` : `Market ${marketAddress.slice(0, 10)}...`}
                     </option>
                   );
                 })}
               </select>
+              
+              {/* DEBUG INFO */}
+              <div className="text-xs text-base-content/60 mt-2">
+                <div>🔍 Factory Markets: {allMarkets?.length || 0} available</div>
+                {allMarkets?.length === 0 && (
+                  <div className="text-warning">⚠️ No markets from Factory - create one first</div>
+                )}
+                {selectedMarket && (
+                  <div className="mt-1">
+                    <div>✅ Selected: {selectedMarket}</div>
+                    <div>✅ Valid: {allMarkets?.includes(selectedMarket) ? "Yes" : "❌ NO - Invalid market!"}</div>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="form-control">

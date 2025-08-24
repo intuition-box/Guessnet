@@ -22,11 +22,6 @@ export const menuLinks: HeaderMenuLink[] = [
     href: "/",
   },
   {
-    label: "Prediction Markets",
-    href: "/prediction-markets",
-    icon: <ChartBarIcon className="h-4 w-4" />,
-  },
-  {
     label: "Oracle",
     href: "/oracle",
     icon: <EyeIcon className="h-4 w-4" />,

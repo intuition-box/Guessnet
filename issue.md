@@ -2,30 +2,37 @@
 
 Created a market of 250000 threshold 
 +2h
-Bet amount 2 ETH
 
 
 **block page**
 Transaction Market Created 
+Bet Created 
 
 # Issue 
 
 **block page**
 Bet created but unknow function called 
 
+Transaction Hash:	0x478d9ad2331d2bab5729c16971d7efd7ee1c72f146fb1e9e4b4408374f578a6e
+Block Number:	18
+From:	
+0x09708E3215a3d970e6d27B0af5F709d57ff78dA4 avatar
+0x09708E3215a3d970e6d27B0af5F709d57ff78dA4
+
+To:	
+0x9f1ac54BEF0DD2f6f3462EA0fa94fC62300d3a8e avatar
+0x9f1ac54BEF0DD2f6f3462EA0fa94fC62300d3a8e
+
+Value:	0.9 ETH
+Function called:	
+0x43046844
+Gas Price:	1.100676883 Gwei
+Data:	
+0x430468440000000000000000000000000000000000000000000000000000000000000000
+Logs:	
+Log 0 topics: [ "0xe8bcec081119392599b60e1206c80b5ce85381e4a7371cc28ec1050e93681189", "0x00000000000000000000000009708e3215a3d970e6d27b0af5f709d57ff78da4", "0x0000000000000000000000000000000000000000000000000000000000000001" ]
 
 ## Prediction Market Page 
-
-Active Markets Section 
-Transaction market is created but the value is not updated 
-Bet also not upadted
-
-Market at 0x24B3c7...
-Threshold: 2 500 000 | Ends: 25/08/2025 02:15:17
-Total Locked
-0 ETH
-ABOVE: 0 ETH
-BELOW: 0 ETH
 
 **Infinite loading :** 
 Creating market
@@ -43,28 +50,46 @@ No markets awaiting resolution - All markets are up to date!
 # Block Explorer 
 **transaction details**
 
-transaction market created : 
-
-Transaction Hash:	0x25902ad79e227c1e439a796492d05b4bd82bbdab93b61f0a9efa15eae9f3c862
-Block Number:	17
+Transaction Hash:	0x478d9ad2331d2bab5729c16971d7efd7ee1c72f146fb1e9e4b4408374f578a6e
+Block Number:	18
 From:	
-0x2Afb79E9FA766D4a923a4aa72ed5d1e16C6B1063 avatar
-0x2Afb79E9FA766D4a923a4aa72ed5d1e16C6B1063
+0x09708E3215a3d970e6d27B0af5F709d57ff78dA4 avatar
+0x09708E3215a3d970e6d27B0af5F709d57ff78dA4
 
 To:	
-0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 avatar
-0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+0x9f1ac54BEF0DD2f6f3462EA0fa94fC62300d3a8e avatar
+0x9f1ac54BEF0DD2f6f3462EA0fa94fC62300d3a8e
 
-Value:	0.8 ETH
+Value:	0.9 ETH
 Function called:	
-createTransactionMarket(string _description = Will Intuition have more than 2 500 000 transactions in 2 hours?, uint256 _transactionThreshold = 2500000, uint256 _deadline = 1756033777, address _customOracle = 0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82)0xd1b18f79
-Gas Price:	1.111651778 Gwei
+0x43046844
+Gas Price:	1.100676883 Gwei
 Data:	
-0xd1b18f79000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000002625a00000000000000000000000000000000000000000000000000000000068aaf2f10000000000000000000000000dcd1bf9a1b36ce34237eeafef220932846bcd82000000000000000000000000000000000000000000000000000000000000004457696c6c20496e74756974696f6e2068617665206d6f7265207468616e2032e280af353030e280af303030207472616e73616374696f6e7320696e203220686f7572733f00000000000000000000000000000000000000000000000000000000
+0x430468440000000000000000000000000000000000000000000000000000000000000000
 Logs:	
-Log 0 topics: [ "0x00e658621d94668232e7e5db2279d76e6d8ff89b0252e5655882465d5e8a9bba", "0x000000000000000000000000cafac3dd18ac6c6e92c921884f9e4176737c052c", "0x0000000000000000000000002afb79e9fa766d4a923a4aa72ed5d1e16c6b1063", "0x0000000000000000000000000dcd1bf9a1b36ce34237eeafef220932846bcd82" ]
+Log 0 topics: [ "0xe8bcec081119392599b60e1206c80b5ce85381e4a7371cc28ec1050e93681189", "0x00000000000000000000000009708e3215a3d970e6d27b0af5f709d57ff78da4", "0x0000000000000000000000000000000000000000000000000000000000000001" ]
 
-# Solution 
+Transaction Hash:	0x72a8ed3ed79e0e9c9c1a03c26b91f97c6ab8f912e183b27d35f0412687f1e30f
+Block Number:	17
+From:	
+0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 avatar
+0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+
+To:	
+0x09708E3215a3d970e6d27B0af5F709d57ff78dA4 avatar
+0x09708E3215a3d970e6d27B0af5F709d57ff78dA4
+
+Value:	1 ETH
+Function called:	
+This transaction did not call any function.
+Gas Price:	1.115036287 Gwei
+Data:	
+0x
+Logs:
+
+
+
+<!-- # Solution 
 1. Interface non synchronisée avec les contrats
 
   - Le frontend (page.tsx:62-87) simule les données des marchés au lieu d'appeler les vraies fonctions de
@@ -98,4 +123,4 @@ Log 0 topics: [ "0x00e658621d94668232e7e5db2279d76e6d8ff89b0252e5655882465d5e8a9
   Implémenter les vrais appels de contrat pour :
   - Lire les données réelles des marchés avec useScaffoldReadContract
   - Implémenter la vraie fonction placeBet avec useScaffoldWriteContract
-  - Supprimer les simulations et utiliser les vraies données blockchain
+  - Supprimer les simulations et utiliser les vraies données blockchain -->

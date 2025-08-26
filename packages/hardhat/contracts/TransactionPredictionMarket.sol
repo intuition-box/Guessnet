@@ -4,6 +4,14 @@ pragma solidity >=0.8.0 <0.9.0;
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
+ * @title IPredictionMarketOracle
+ * @notice Interface for the oracle that provides transaction count data
+ */
+interface IPredictionMarketOracle {
+    function getCurrentTransactionCount() external view returns (uint256);
+}
+
+/**
  * @title TransactionPredictionMarket
  * @notice Individual prediction market for betting on blockchain transaction counts
  * @dev Allows users to bet on whether transaction count will be above or below a threshold by a deadline
@@ -66,12 +74,14 @@ contract TransactionPredictionMarket is ReentrancyGuard {
     
     // Liquidity tracking
     uint256 public totalLiquidity; // Total ETH in the market
+    uint256 public initialLiquidityAmount; // Initial liquidity provided by creator
     address public liquidityProvider; // Creator who provided initial liquidity
     
     // Bet tracking
     Bet[] public bets;
     mapping(address => uint256[]) public userBetIds;
     mapping(address => bool) public hasClaimedWinnings;
+    bool public hasCreatorWithdrawnLiquidity;
     
     // Constants
     uint256 private constant HOUSE_FEE_PERCENTAGE = 2; // 2% house fee
@@ -102,6 +112,18 @@ contract TransactionPredictionMarket is ReentrancyGuard {
     event OracleUpdated(
         address indexed oldOracle,
         address indexed newOracle
+    );
+
+    event InitialLiquidityWithdrawn(
+        address indexed creator,
+        uint256 amount,
+        uint256 timestamp
+    );
+
+    event MarketAutoResolved(
+        uint256 actualTransactionCount,
+        BetType winningBetType,
+        uint256 timestamp
     );
     
     /////////////////
@@ -175,6 +197,7 @@ contract TransactionPredictionMarket is ReentrancyGuard {
         
         // Initialize liquidity if ETH is provided
         if (msg.value > 0) {
+            initialLiquidityAmount = msg.value;
             totalLiquidity = msg.value;
             liquidityProvider = _creator;
         }
@@ -252,10 +275,20 @@ contract TransactionPredictionMarket is ReentrancyGuard {
     }
     
     /**
-     * @notice Claim winnings for resolved market
+     * @notice Claim winnings for expired/resolved market
      * @dev Winners receive their proportional share of the losing pool minus house fee
+     * @dev Auto-resolves market if expired but not yet resolved
      */
-    function claimWinnings() external onlyResolved nonReentrant {
+    function claimWinnings() external nonReentrant {
+        // Auto-resolve market if expired but not resolved
+        if (block.timestamp >= deadline && marketStatus == MarketStatus.ACTIVE) {
+            _autoResolveMarket();
+        }
+        
+        if (marketStatus != MarketStatus.RESOLVED) {
+            revert TransactionPredictionMarket__MarketNotResolved();
+        }
+        
         if (hasClaimedWinnings[msg.sender]) {
             revert TransactionPredictionMarket__AlreadyClaimedWinnings();
         }
@@ -288,6 +321,58 @@ contract TransactionPredictionMarket is ReentrancyGuard {
         oracle = _newOracle;
         
         emit OracleUpdated(oldOracle, _newOracle);
+    }
+
+    /**
+     * @notice Withdraw initial liquidity (only creator after resolution)
+     * @dev Creator can withdraw ONLY their initial liquidity contribution, not user bets
+     */
+    function withdrawInitialLiquidity() external onlyResolved nonReentrant {
+        require(msg.sender == creator, "Only creator can withdraw initial liquidity");
+        require(!hasCreatorWithdrawnLiquidity, "Initial liquidity already withdrawn");
+        require(initialLiquidityAmount > 0, "No initial liquidity to withdraw");
+        
+        hasCreatorWithdrawnLiquidity = true;
+        uint256 withdrawAmount = initialLiquidityAmount;
+        
+        // Transfer ONLY the initial liquidity amount back to creator
+        (bool success, ) = payable(creator).call{value: withdrawAmount}("");
+        require(success, "Transfer failed");
+        
+        emit InitialLiquidityWithdrawn(creator, withdrawAmount, block.timestamp);
+    }
+
+    /**
+     * @notice Internal function to auto-resolve market by fetching current transaction count from oracle
+     * @dev Called automatically when claimWinnings is called on an expired market
+     */
+    function _autoResolveMarket() internal {
+        // Fetch current transaction count from oracle
+        // For now, we'll use a simple external call to get the current transaction count
+        // In production, this could be integrated with the oracle contract
+        
+        uint256 currentTransactionCount;
+        
+        // Try to get current transaction count from oracle
+        try IPredictionMarketOracle(oracle).getCurrentTransactionCount() returns (uint256 count) {
+            currentTransactionCount = count;
+        } catch {
+            // If oracle call fails, we could implement a fallback mechanism
+            // For now, we'll revert to require manual resolution
+            revert TransactionPredictionMarket__OnlyOracleCanResolve();
+        }
+        
+        actualTransactionCount = currentTransactionCount;
+        marketStatus = MarketStatus.RESOLVED;
+        
+        // Determine winning bet type
+        if (currentTransactionCount >= transactionThreshold) {
+            winningBetType = BetType.ABOVE_THRESHOLD;
+        } else {
+            winningBetType = BetType.BELOW_THRESHOLD;
+        }
+        
+        emit MarketAutoResolved(currentTransactionCount, winningBetType, block.timestamp);
     }
     
     /////////////////////////
@@ -400,10 +485,24 @@ contract TransactionPredictionMarket is ReentrancyGuard {
     }
     
     /**
-     * @notice Get total value locked in the market
+     * @notice Get total value locked in the market (user bets only)
      */
     function getTotalValueLocked() external view returns (uint256) {
         return totalAboveBets + totalBelowBets;
+    }
+    
+    /**
+     * @notice Get total liquidity including initial creator contribution
+     */
+    function getTotalLiquidity() external view returns (uint256) {
+        return totalLiquidity;
+    }
+    
+    /**
+     * @notice Get initial liquidity provided by creator
+     */
+    function getInitialLiquidityAmount() external view returns (uint256) {
+        return initialLiquidityAmount;
     }
     
     /**

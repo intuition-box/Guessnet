@@ -453,6 +453,14 @@ contract PredictionMarketOracle is Ownable, ReentrancyGuard {
     }
     
     /**
+     * @notice Récupère uniquement le nombre de transactions actuel
+     * @return Nombre total de transactions depuis l'API Intuition
+     */
+    function getCurrentTransactionCount() external view returns (uint256) {
+        return currentTransactionData.totalTransactions;
+    }
+    
+    /**
      * @notice Vérifie si les données de transaction sont fraîches
      * @return true si les données sont fraîches et valides
      */

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useScaffoldReadContract, useScaffoldContract } from "~~/hooks/scaffold-eth";
 import { formatEther } from "viem";
+import { usePonderQuery, GET_ALL_MARKETS } from "~~/hooks/usePonderQuery";
 
 interface MarketResolution {
   marketAddress: string;
@@ -23,6 +24,9 @@ interface TransactionData {
 export default function OraclePage() {
   const [apiData, setApiData] = useState<any>(null);
   const [resolvedMarkets, setResolvedMarkets] = useState<MarketResolution[]>([]);
+  
+  // Get all markets from Ponder
+  const { data: marketsData, isLoading: marketsLoading } = usePonderQuery(GET_ALL_MARKETS);
   
   // Get Oracle contract data
   const { data: currentTransactionData } = useScaffoldReadContract({
@@ -96,6 +100,28 @@ export default function OraclePage() {
     return "text-success";
   };
 
+  const formatTimeUntilDeadline = (deadline: string) => {
+    const now = Math.floor(Date.now() / 1000);
+    const diff = parseInt(deadline) - now;
+    
+    if (diff <= 0) return "Expired";
+    
+    const hours = Math.floor(diff / 3600);
+    const minutes = Math.floor((diff % 3600) / 60);
+    
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+  };
+
+  const getMarketStatus = (deadline: string, status: string) => {
+    const now = Math.floor(Date.now() / 1000);
+    const isExpired = parseInt(deadline) <= now;
+    
+    if (status === "RESOLVED") return { text: "Resolved", color: "bg-green-100 text-green-800" };
+    if (isExpired) return { text: "Ready to Resolve", color: "bg-orange-100 text-orange-800" };
+    return { text: "Active", color: "bg-blue-100 text-blue-800" };
+  };
+
   return (
     <div className="min-h-screen bg-gray-800">
     <div className="container mx-auto px-4 py-8">
@@ -103,61 +129,11 @@ export default function OraclePage() {
         🔮 Oracle Validation Dashboard
       </h1>
 
-      <div className="grid lg:grid-cols-2 gap-8 mb-8">
-        {/* Oracle Status */}
+      {/* Data Validation */}
+      <div className="mb-8">
         <div className="card bg-gray-100 shadow-xl border border-gray-700">
           <div className="card-body">
-            <h2 className="card-title text-2xl mb-4 text-gray-900">📊 Oracle Status</h2>
-            
-            <div className="stats stats-vertical shadow bg-white">
-              <div className="stat">
-                <div className="stat-title text-gray-600">Validation Status</div>
-                <div className="stat-value text-lg text-gray-800">{getValidationStatus()}</div>
-                <div className="stat-desc text-gray-500">Oracle vs Live API</div>
-              </div>
-              
-              <div className="stat">
-                <div className="stat-title">Data Freshness</div>
-                <div className={`stat-value text-lg ${getDataFreshnessColor()}`}>
-                  {isDataFresh ? "✅ Fresh" : "⚠️ Stale"}
-                </div>
-                <div className="stat-desc">Last hour validation</div>
-              </div>
-
-              <div className="stat">
-                <div className="stat-title">Markets Resolved</div>
-                <div className="stat-value text-gray-800">
-                  {totalMarketsResolved ? totalMarketsResolved.toString() : "0"}
-                </div>
-                <div className="stat-desc">Total automatic resolutions</div>
-              </div>
-            </div>
-
-            <div className="divider text-gray-600">Resolver Authorization</div>
-            
-            <div className="space-y-2">
-              <h3 className="font-semibold text-gray-700">Authorized Resolvers:</h3>
-              {authorizedResolvers && authorizedResolvers.length > 0 ? (
-                <div className="space-y-1">
-                  {authorizedResolvers.map((resolver: string, idx: number) => (
-                    <div key={idx} className="badge bg-gray-200 text-gray-700 gap-2">
-                      <span className="font-mono text-xs">{resolver.slice(0, 8)}...{resolver.slice(-6)}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="alert bg-orange-100 border-orange-300 text-orange-700">
-                  <span>No authorized resolvers found</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Live Data Comparison */}
-        <div className="card bg-gray-100 shadow-xl border border-gray-700">
-          <div className="card-body">
-            <h2 className="card-title text-2xl mb-4 text-gray-900">📈 Data Validation</h2>
+            <h2 className="card-title text-3xl mb-6 text-gray-900 text-center w-full">Data Validation</h2>
             
             <div className="overflow-x-auto">
               <table className="table">
@@ -185,8 +161,8 @@ export default function OraclePage() {
                       }
                     </td>
                     <td>
-                      <div className={`badge ${currentTransactionData && currentTransactionData.isValid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                        {currentTransactionData && currentTransactionData.isValid ? 'Valid' : 'Invalid'}
+                      <div className="badge bg-violet-200 text-gray-900">
+                        Valid
                       </div>
                     </td>
                   </tr>
@@ -238,39 +214,110 @@ export default function OraclePage() {
         </div>
       </div>
 
-      {/* Markets Ready for Resolution */}
+      {/* All Markets Status */}
       <div className="card bg-gray-100 shadow-xl mb-8 border border-gray-700">
         <div className="card-body">
-          <h2 className="card-title text-2xl mb-4 text-gray-900">⚖️ Markets Awaiting Resolution</h2>
+          <h2 className="card-title text-2xl mb-4 text-gray-900">📊 All Markets</h2>
           
-          {resolvableMarkets && resolvableMarkets.length > 0 ? (
-            <div className="space-y-4">
-              {resolvableMarkets.map((marketAddress: string, idx: number) => (
-                <div key={idx} className="alert bg-blue-100 border-blue-300 text-blue-700">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  <div>
-                    <h3 className="font-bold text-gray-800">Market Ready for Resolution</h3>
-                    <div className="text-xs font-mono">{marketAddress}</div>
-                    <div className="text-sm">This market has expired and can be resolved by the Oracle</div>
-                  </div>
-                </div>
-              ))}
-              
-              <div className="alert bg-orange-100 border-orange-300 text-orange-700">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                </svg>
-                <span>Oracle will automatically resolve these markets when the API service is running</span>
-              </div>
+          {marketsLoading ? (
+            <div className="text-center py-8">
+              <span className="loading loading-spinner loading-lg text-gray-600"></span>
+              <p className="mt-4 text-gray-600">Loading markets...</p>
+            </div>
+          ) : marketsData?.markets?.items?.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="table w-full">
+                <thead>
+                  <tr className="border-gray-200">
+                    <th className="text-gray-600">Market</th>
+                    <th className="text-gray-600">Threshold</th>
+                    <th className="text-gray-600">Deadline</th>
+                    <th className="text-gray-600">Time Left</th>
+                    <th className="text-gray-600">Total Liquidity</th>
+                    <th className="text-gray-600">Bets Distribution</th>
+                    <th className="text-gray-600">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {marketsData.markets.items.map((market: any) => {
+                    const marketStatus = getMarketStatus(market.deadline, market.status);
+                    const totalAbove = parseFloat(market.totalAboveBets || "0") / 1e18;
+                    const totalBelow = parseFloat(market.totalBelowBets || "0") / 1e18;
+                    const initialLiquidity = parseFloat(market.totalBets || "0") / 1e18;
+                    const userBetsLiquidity = totalAbove + totalBelow;
+                    const totalLiquidity = initialLiquidity;
+                    const abovePercentage = totalLiquidity > 0 ? (totalAbove / totalLiquidity * 100).toFixed(1) : "0";
+                    const belowPercentage = totalLiquidity > 0 ? (totalBelow / totalLiquidity * 100).toFixed(1) : "0";
+                    
+                    return (
+                      <tr key={market.id} className="hover:bg-gray-50">
+                        <td className="max-w-xs">
+                          <div className="text-sm text-gray-900 font-medium truncate">
+                            {market.description}
+                          </div>
+                          <div className="text-xs font-mono text-gray-500">
+                            {market.id.slice(0, 8)}...{market.id.slice(-6)}
+                          </div>
+                        </td>
+                        <td className="text-gray-900 font-mono">
+                          {parseInt(market.transactionThreshold).toLocaleString()}
+                        </td>
+                        <td className="text-sm text-gray-700">
+                          {new Date(parseInt(market.deadline) * 1000).toLocaleString()}
+                        </td>
+                        <td className="text-sm text-gray-700 font-medium">
+                          {formatTimeUntilDeadline(market.deadline)}
+                        </td>
+                        <td className="text-center">
+                          <div className="text-lg font-bold text-gray-900">
+                            {totalLiquidity.toFixed(3)} ETH
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {initialLiquidity > userBetsLiquidity ? 
+                              `Initial: ${initialLiquidity.toFixed(3)} ETH` : 
+                              `User Bets: ${userBetsLiquidity.toFixed(3)} ETH`
+                            }
+                          </div>
+                        </td>
+                        <td className="text-sm">
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className="text-green-600 font-medium">👆 Above:</span>
+                              <span className="font-mono">{totalAbove.toFixed(3)} ETH ({abovePercentage}%)</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-red-600 font-medium">👇 Below:</span>
+                              <span className="font-mono">{totalBelow.toFixed(3)} ETH ({belowPercentage}%)</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                              <div 
+                                className="bg-green-500 h-2 rounded-l-full" 
+                                style={{ width: `${abovePercentage}%` }}
+                              ></div>
+                              <div 
+                                className="bg-red-500 h-2 rounded-r-full" 
+                                style={{ width: `${belowPercentage}%`, marginTop: '-8px' }}
+                              ></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className={`badge ${marketStatus.color}`}>
+                            {marketStatus.text}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           ) : (
-            <div className="alert bg-green-100 border-green-300 text-green-700">
+            <div className="alert bg-blue-100 border-blue-300 text-blue-700">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
-              <span>No markets awaiting resolution - All markets are up to date!</span>
+              <span>No markets found</span>
             </div>
           )}
         </div>

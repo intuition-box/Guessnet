@@ -92,6 +92,28 @@ async function resolveMarkets() {
   try {
     // Get current timestamp as string for GraphQL BigInt type
     const currentTimestamp = Math.floor(Date.now() / 1000).toString();
+    console.log(`Current timestamp: ${currentTimestamp}`);
+    
+    // First, let's see all active markets for debugging
+    const allMarketsData = await fetchFromPonder(`
+      query GetAllActiveMarkets {
+        markets(where: { status: "ACTIVE" }) {
+          items {
+            id
+            description
+            deadline
+            oracle
+          }
+        }
+      }
+    `, {});
+    
+    console.log(`Total active markets: ${allMarketsData.markets?.items?.length || 0}`);
+    if (allMarketsData.markets?.items?.length > 0) {
+      allMarketsData.markets.items.forEach((market: any) => {
+        console.log(`- Market: ${market.id.slice(0, 10)}... deadline: ${market.deadline} (${new Date(parseInt(market.deadline) * 1000).toLocaleString()})`);
+      });
+    }
     
     // Fetch markets ready for resolution from Ponder
     const marketsData = await fetchFromPonder(GET_RESOLVABLE_MARKETS, { 
@@ -168,9 +190,9 @@ async function main() {
   // Run once on start
   await resolveMarkets();
   
-  // Then run every 5 minutes
-  console.log("Oracle service started. Checking for markets to resolve every 5 minutes...");
-  setInterval(resolveMarkets, 5 * 60 * 1000);
+  // Then run every 10 seconds
+  console.log("Oracle service started. Checking for markets to resolve every 10 seconds...");
+  setInterval(resolveMarkets, 10 * 1000);
 }
 
 main().catch((error) => {

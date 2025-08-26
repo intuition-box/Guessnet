@@ -1,230 +1,179 @@
 import { ethers } from "hardhat";
-import axios from 'axios';
-import * as cron from 'node-cron';
+import axios from "axios";
 
-/**
- * Service Oracle - Alimente le contrat Oracle avec les données d'Intuition
- * et résout automatiquement les marchés expirés
- */
+const PONDER_URL = process.env.PONDER_URL || "http://localhost:42069";
+const ORACLE_CONTRACT_ADDRESS = process.env.ORACLE_CONTRACT_ADDRESS;
+const FACTORY_CONTRACT_ADDRESS = process.env.FACTORY_CONTRACT_ADDRESS;
 
-interface IntuitionStatsResponse {
-  total_transactions: string;
-  transactions_today: string;
-  total_blocks: string;
-  total_addresses: string;
-  average_block_time: number;
+// GraphQL query to get markets ready for resolution
+const GET_RESOLVABLE_MARKETS = `
+  query GetResolvableMarkets($currentTimestamp: BigInt!) {
+    markets(
+      where: { 
+        status: "ACTIVE",
+        deadline_lte: $currentTimestamp
+      }
+    ) {
+      items {
+        id
+        description
+        transactionThreshold
+        deadline
+        oracle
+        totalAboveBets
+        totalBelowBets
+      }
+    }
+  }
+`;
+
+// GraphQL query to get market bets for Intuition check
+const GET_MARKET_BETTORS = `
+  query GetMarketBettors($marketAddress: String!) {
+    bets(where: { marketAddress: $marketAddress }) {
+      items {
+        bettor
+        betType
+        amount
+      }
+    }
+  }
+`;
+
+interface IntuitionAPIResponse {
+  address: string;
+  transactionCount: number;
 }
 
-class OracleService {
-  private apiUrl = 'https://intuition-testnet.explorer.caldera.xyz/api/v2/stats';
-  private oracleContract: any;
-  private factoryContract: any;
-  private signer: any;
-
-  constructor() {
-    console.log('🔮 Oracle Service Starting...');
-  }
-
-  async initialize(): Promise<boolean> {
-    try {
-      console.log('🔧 Initializing Oracle Service...');
-
-      // Get signer
-      const [deployer] = await ethers.getSigners();
-      this.signer = deployer;
-      console.log(`👤 Oracle Operator: ${deployer.address}`);
-
-      // Get deployed contracts
-      const oracleAddress = process.env.ORACLE_CONTRACT_ADDRESS;
-      const factoryAddress = process.env.FACTORY_CONTRACT_ADDRESS;
-
-      if (!oracleAddress || !factoryAddress) {
-        console.log('❌ Missing contract addresses. Run deployment first.');
-        return false;
-      }
-
-      // Connect to contracts
-      this.oracleContract = await ethers.getContractAt("PredictionMarketOracle", oracleAddress);
-      this.factoryContract = await ethers.getContractAt("PredictionMarketFactory", factoryAddress);
-
-      console.log(`🏭 Factory Contract: ${factoryAddress}`);
-      console.log(`🔮 Oracle Contract: ${oracleAddress}`);
-
-      // Test API connection
-      const apiConnected = await this.testApiConnection();
-      if (!apiConnected) {
-        console.log('❌ Cannot connect to Intuition API');
-        return false;
-      }
-
-      console.log('✅ Oracle Service initialized successfully');
-      return true;
-
-    } catch (error: any) {
-      console.error('❌ Failed to initialize Oracle Service:', error.message);
-      return false;
-    }
-  }
-
-  async testApiConnection(): Promise<boolean> {
-    try {
-      const response = await axios.get<IntuitionStatsResponse>(this.apiUrl, {
-        headers: { 'accept': 'application/json' },
-        timeout: 10000
-      });
-
-      if (response.status === 200) {
-        console.log('✅ Intuition API: Connected');
-        console.log(`📊 Current TX Count: ${parseInt(response.data.total_transactions).toLocaleString()}`);
-        return true;
-      }
-      return false;
-
-    } catch (error: any) {
-      console.error('❌ API Connection Failed:', error.message);
-      return false;
-    }
-  }
-
-  async updateOracleData(): Promise<boolean> {
-    try {
-      console.log('📡 Fetching latest data from Intuition API...');
-
-      // Get data from API
-      const response = await axios.get<IntuitionStatsResponse>(this.apiUrl, {
-        timeout: 10000
-      });
-
-      const data = response.data;
-      const totalTransactions = parseInt(data.total_transactions);
-      const timestamp = Math.floor(Date.now() / 1000);
-
-      console.log(`📊 Data: ${totalTransactions.toLocaleString()} transactions`);
-
-      // Update Oracle contract with new data
-      console.log('💾 Updating Oracle contract...');
-      
-      const tx = await this.oracleContract.updateTransactionData(
-        totalTransactions,
-        timestamp,
-        { gasLimit: 300000 }
-      );
-
-      const receipt = await tx.wait();
-      console.log(`✅ Oracle updated: ${receipt.transactionHash}`);
-      
-      return true;
-
-    } catch (error: any) {
-      console.error('❌ Failed to update Oracle:', error.message);
-      return false;
-    }
-  }
-
-  async checkAndResolveMarkets(): Promise<void> {
-    try {
-      console.log('🔍 Checking for expired markets...');
-
-      // Get all markets from factory
-      const allMarkets = await this.factoryContract.getAllMarkets();
-      console.log(`📊 Total markets: ${allMarkets.length}`);
-
-      if (allMarkets.length === 0) {
-        console.log('📭 No markets to check');
-        return;
-      }
-
-      for (let i = 0; i < allMarkets.length; i++) {
-        try {
-          const marketAddress = allMarkets[i];
-          const marketContract = await ethers.getContractAt("TransactionPredictionMarket", marketAddress);
-
-          // Check if market is expired and not resolved
-          const deadline = await marketContract.deadline();
-          const marketStatus = await marketContract.marketStatus();
-          const currentTime = Math.floor(Date.now() / 1000);
-
-          // MarketStatus: 0=ACTIVE, 1=RESOLVED, 2=CANCELLED
-          if (currentTime > deadline && marketStatus === 0) {
-            console.log(`⏰ Market ${i} expired, resolving...`);
-            
-            // Resolve market via Oracle
-            const tx = await this.oracleContract.resolveMarket(marketAddress, { gasLimit: 500000 });
-            const receipt = await tx.wait();
-            
-            console.log(`✅ Market ${i} resolved: ${receipt.transactionHash}`);
-          }
-
-        } catch (error: any) {
-          console.error(`❌ Error checking market ${i}:`, error.message);
-        }
-      }
-
-    } catch (error: any) {
-      console.error('❌ Error checking markets:', error.message);
-    }
-  }
-
-  async startService(): Promise<void> {
-    console.log('🚀 Starting Oracle Service...');
-    console.log('=====================================');
-
-    // Initial data update
-    await this.updateOracleData();
-    await this.checkAndResolveMarkets();
-
-    // Schedule regular updates every 5 minutes
-    cron.schedule('*/5 * * * *', async () => {
-      console.log(`\n⏰ ${new Date().toLocaleTimeString()} - Oracle Update`);
-      try {
-        await this.updateOracleData();
-        await this.checkAndResolveMarkets();
-      } catch (error: any) {
-        console.error('❌ Scheduled update failed:', error.message);
-      }
+async function fetchFromPonder(query: string, variables: any) {
+  try {
+    const response = await axios.post(PONDER_URL, {
+      query,
+      variables,
     });
-
-    console.log('✅ Oracle Service is running');
-    console.log('📅 Updates: Every 5 minutes');
-    console.log('🛑 Press Ctrl+C to stop');
+    
+    if (response.data.errors) {
+      throw new Error(response.data.errors[0].message);
+    }
+    
+    return response.data.data;
+  } catch (error) {
+    console.error("Error fetching from Ponder:", error);
+    throw error;
   }
+}
 
-  async stopService(): Promise<void> {
-    console.log('\n🛑 Stopping Oracle Service...');
-    process.exit(0);
+async function fetchIntuitionData(): Promise<number> {
+  // Fetch total transactions from Intuition API
+  console.log("Fetching total transactions from Intuition API...");
+  
+  try {
+    const response = await axios.get('https://intuition-testnet.explorer.caldera.xyz/api/v2/stats');
+    const totalTransactions = response.data?.total_transactions || "0";
+    const transactionCount = parseInt(totalTransactions.replace(/,/g, ''));
+    
+    console.log(`Intuition API - Total transactions: ${transactionCount}`);
+    return transactionCount;
+  } catch (error) {
+    console.error("Error fetching Intuition data:", error);
+    throw error;
+  }
+}
+
+async function getActualTransactionCount(): Promise<number> {
+  // For TransactionPredictionMarket, we care about the total blockchain transactions
+  // not individual user transactions
+  return await fetchIntuitionData();
+}
+
+async function resolveMarkets() {
+  console.log("Oracle Service: Starting market resolution check...");
+  
+  try {
+    // Get current timestamp as string for GraphQL BigInt type
+    const currentTimestamp = Math.floor(Date.now() / 1000).toString();
+    
+    // Fetch markets ready for resolution from Ponder
+    const marketsData = await fetchFromPonder(GET_RESOLVABLE_MARKETS, { 
+      currentTimestamp 
+    });
+    
+    const markets = marketsData.markets?.items || [];
+    console.log(`Found ${markets.length} markets ready for resolution`);
+    
+    if (markets.length === 0) {
+      console.log("No markets to resolve");
+      return;
+    }
+    
+    // Connect to Oracle contract
+    const [signer] = await ethers.getSigners();
+    const oracleContract = await ethers.getContractAt(
+      "PredictionMarketOracle",
+      ORACLE_CONTRACT_ADDRESS!,
+      signer
+    );
+    
+    // Process each market
+    for (const market of markets) {
+      console.log(`\nProcessing market: ${market.id}`);
+      console.log(`Description: ${market.description}`);
+      console.log(`Threshold: ${market.transactionThreshold}`);
+      
+      try {
+        // Check if this oracle is authorized for this market
+        if (market.oracle.toLowerCase() !== ORACLE_CONTRACT_ADDRESS?.toLowerCase()) {
+          console.log(`Skipping - different oracle: ${market.oracle}`);
+          continue;
+        }
+        
+        // Get actual transaction count from Intuition API
+        const actualCount = await getActualTransactionCount();
+        console.log(`Actual transaction count: ${actualCount}`);
+        
+        // Resolve market through Oracle contract
+        console.log("Sending resolution transaction...");
+        const tx = await oracleContract.resolveMarket(
+          market.id,
+          actualCount,
+          { gasLimit: 500000 }
+        );
+        
+        console.log(`Transaction hash: ${tx.hash}`);
+        await tx.wait();
+        console.log(`✅ Market ${market.id} resolved successfully`);
+        
+      } catch (error) {
+        console.error(`Error resolving market ${market.id}:`, error);
+      }
+    }
+    
+  } catch (error) {
+    console.error("Error in oracle service:", error);
   }
 }
 
 async function main() {
-  const oracle = new OracleService();
-  
-  const initialized = await oracle.initialize();
-  if (!initialized) {
-    console.log('❌ Failed to initialize Oracle Service');
+  if (!ORACLE_CONTRACT_ADDRESS || !FACTORY_CONTRACT_ADDRESS) {
+    console.error("Please set ORACLE_CONTRACT_ADDRESS and FACTORY_CONTRACT_ADDRESS environment variables");
     process.exit(1);
   }
-
-  // Start the service
-  await oracle.startService();
+  
+  console.log("Oracle Service Configuration:");
+  console.log("- Ponder URL:", PONDER_URL);
+  console.log("- Oracle Contract:", ORACLE_CONTRACT_ADDRESS);
+  console.log("- Factory Contract:", FACTORY_CONTRACT_ADDRESS);
+  console.log("");
+  
+  // Run once on start
+  await resolveMarkets();
+  
+  // Then run every 5 minutes
+  console.log("Oracle service started. Checking for markets to resolve every 5 minutes...");
+  setInterval(resolveMarkets, 5 * 60 * 1000);
 }
 
-// Gestion de l'arrêt propre
-process.on('SIGINT', async () => {
-  console.log('\n🛑 Received SIGINT, stopping Oracle Service...');
-  process.exit(0);
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
 });
-
-process.on('SIGTERM', async () => {
-  console.log('\n🛑 Received SIGTERM, stopping Oracle Service...');
-  process.exit(0);
-});
-
-// Run the service
-if (require.main === module) {
-  main().catch((error) => {
-    console.error('❌ Oracle Service crashed:', error);
-    process.exit(1);
-  });
-}
-
-export { OracleService };

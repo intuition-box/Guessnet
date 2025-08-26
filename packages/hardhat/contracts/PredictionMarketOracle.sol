@@ -507,18 +507,18 @@ contract PredictionMarketOracle is Ownable, ReentrancyGuard {
         
         try TransactionPredictionMarket(payable(marketAddress)).getMarketInfo() 
             returns (
-                address,
-                address,
-                string memory,
-                uint256,
+                address _creator,
+                address _oracle,
+                string memory _description,
+                uint256 _threshold,
                 uint256 deadline,
-                uint256,
+                uint256 _createdAt,
                 TransactionPredictionMarket.MarketStatus status,
-                uint256,
-                uint256,
-                uint256,
-                uint256,
-                TransactionPredictionMarket.BetType
+                uint256 _aboveBets,
+                uint256 _belowBets,
+                uint256 _bettorCount,
+                uint256 _totalValueLocked,
+                TransactionPredictionMarket.BetType _winningType
             ) 
         {
             return status == TransactionPredictionMarket.MarketStatus.ACTIVE && 

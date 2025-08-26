@@ -1,0 +1,229 @@
+[2025-08-25T18:53:46.116Z] 📝 Logging initialized for Intuition API Service
+[2025-08-25T18:53:46.174Z] 🏛️ Oracle Address: 0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0
+[2025-08-25T18:53:46.174Z] 👤 Deployer Address: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+[2025-08-25T18:53:46.174Z] 🔐 Is Authorized Resolver: true
+[2025-08-25T18:53:46.175Z] 📡 API Endpoint: https://intuition-testnet.explorer.caldera.xyz/api/v2/stats
+[2025-08-25T18:53:46.175Z] ⏱️ Update Schedule: */5 * * * *
+[2025-08-25T18:53:46.175Z] 🔄 Retry Attempts: 3
+[2025-08-25T18:53:46.175Z] 🎯 Performing initial update...
+[2025-08-25T18:53:46.175Z] 
+🔄 Starting update cycle...
+[2025-08-25T18:53:46.175Z] 🔍 Fetching data from Intuition API (attempt 1/3)...
+[2025-08-25T18:53:46.409Z] ✅ Successfully fetched data from Intuition API
+[2025-08-25T18:53:46.410Z] 📈 API Data Summary:
+[2025-08-25T18:53:46.522Z]   - Total Transactions: 2,916,105
+[2025-08-25T18:53:46.522Z]   - Transactions Today: 292,640
+[2025-08-25T18:53:46.523Z]   - Total Blocks: 1,367,649
+[2025-08-25T18:53:46.523Z]   - Total Addresses: 357,212
+[2025-08-25T18:53:46.523Z]   - Average Block Time: 618ms
+[2025-08-25T18:53:46.523Z] 📤 Updating Oracle with Intuition API data...
+[2025-08-25T18:53:46.523Z] 📊 Data to update: 2916105 total transactions
+[2025-08-25T18:53:46.646Z] ⏳ Transaction sent to Oracle, waiting for confirmation...
+[2025-08-25T18:53:46.647Z] 📋 Transaction hash: 0xdaaedc3966a7e6a669ae52920c680165a174e8820657145d77d7d7dbc9c2f384
+[2025-08-25T18:53:46.680Z] ✅ Oracle updated successfully!
+[2025-08-25T18:53:46.680Z] 📊 Updated with 2916105 total transactions
+[2025-08-25T18:53:46.680Z] ⛽ Gas used: 114503
+[2025-08-25T18:53:46.680Z] ⚖️ Checking for expired markets to resolve...
+[2025-08-25T18:53:46.705Z] ✅ No expired markets found
+[2025-08-25T18:53:46.706Z] ✅ Update cycle completed successfully
+
+[2025-08-25T18:53:46.751Z] ✅ Intuition API Service started successfully!
+[2025-08-25T18:53:46.751Z] Press Ctrl+C to stop the service
+[2025-08-26T07:15:03.545Z] 📝 Logging initialized for Intuition API Service
+[2025-08-26T07:15:03.597Z] 🏛️ Oracle Address: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
+[2025-08-26T07:15:03.597Z] 👤 Deployer Address: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+[2025-08-26T07:15:03.598Z] 🔐 Is Authorized Resolver: true
+[2025-08-26T07:15:03.598Z] 📡 API Endpoint: https://intuition-testnet.explorer.caldera.xyz/api/v2/stats
+[2025-08-26T07:15:03.598Z] ⏱️ Update Schedule: */5 * * * *
+[2025-08-26T07:15:03.598Z] 🔄 Retry Attempts: 3
+[2025-08-26T07:15:03.599Z] 🎯 Performing initial update...
+[2025-08-26T07:15:03.599Z] 
+🔄 Starting update cycle...
+[2025-08-26T07:15:03.599Z] 🔍 Fetching data from Intuition API (attempt 1/3)...
+[2025-08-26T07:15:03.820Z] ✅ Successfully fetched data from Intuition API
+[2025-08-26T07:15:03.820Z] 📈 API Data Summary:
+[2025-08-26T07:15:03.834Z]   - Total Transactions: 3,049,771
+[2025-08-26T07:15:03.835Z]   - Transactions Today: 297,070
+[2025-08-26T07:15:03.835Z]   - Total Blocks: 1,432,015
+[2025-08-26T07:15:03.835Z]   - Total Addresses: 365,116
+[2025-08-26T07:15:03.835Z]   - Average Block Time: 435ms
+[2025-08-26T07:15:03.835Z] 📤 Updating Oracle with Intuition API data...
+[2025-08-26T07:15:03.835Z] 📊 Data to update: 3049771 total transactions
+[2025-08-26T07:15:03.865Z] ⏳ Transaction sent to Oracle, waiting for confirmation...
+[2025-08-26T07:15:03.865Z] 📋 Transaction hash: 0xbddc132407c63bc2e0849ded176d246e0ac011d4645bc7ad564c798aaccfa6b0
+[2025-08-26T07:15:03.872Z] ✅ Oracle updated successfully!
+[2025-08-26T07:15:03.872Z] 📊 Updated with 3049771 total transactions
+[2025-08-26T07:15:03.872Z] ⛽ Gas used: 114503
+[2025-08-26T07:15:03.872Z] ⚖️ Checking for expired markets to resolve...
+[2025-08-26T07:15:03.885Z] ✅ No expired markets found
+[2025-08-26T07:15:03.886Z] ✅ Update cycle completed successfully
+
+[2025-08-26T07:15:03.911Z] ✅ Intuition API Service started successfully!
+[2025-08-26T07:15:03.911Z] Press Ctrl+C to stop the service
+[2025-08-26T07:20:00.579Z] 
+🔄 Starting update cycle...
+[2025-08-26T07:20:00.582Z] 🔍 Fetching data from Intuition API (attempt 1/3)...
+[2025-08-26T07:20:01.261Z] ✅ Successfully fetched data from Intuition API
+[2025-08-26T07:20:01.262Z] 📈 API Data Summary:
+[2025-08-26T07:20:01.265Z]   - Total Transactions: 3,049,771
+[2025-08-26T07:20:01.266Z]   - Transactions Today: 297,070
+[2025-08-26T07:20:01.266Z]   - Total Blocks: 1,432,015
+[2025-08-26T07:20:01.266Z]   - Total Addresses: 365,116
+[2025-08-26T07:20:01.267Z]   - Average Block Time: 435ms
+[2025-08-26T07:20:01.267Z] 📤 Updating Oracle with Intuition API data...
+[2025-08-26T07:20:01.267Z] 📊 Data to update: 3049771 total transactions
+[2025-08-26T07:20:01.360Z] ⏳ Transaction sent to Oracle, waiting for confirmation...
+[2025-08-26T07:20:01.361Z] 📋 Transaction hash: 0xa442fada56280250540bd3c8b139e530dee89d894fb59bf61cf1c9e48f71c969
+[2025-08-26T07:20:01.377Z] ✅ Oracle updated successfully!
+[2025-08-26T07:20:01.378Z] 📊 Updated with 3049771 total transactions
+[2025-08-26T07:20:01.378Z] ⛽ Gas used: 40503
+[2025-08-26T07:20:01.378Z] ⚖️ Checking for expired markets to resolve...
+[2025-08-26T07:20:01.391Z] ✅ No expired markets found
+[2025-08-26T07:20:01.396Z] ✅ Update cycle completed successfully
+
+[2025-08-26T07:25:00.027Z] 
+🔄 Starting update cycle...
+[2025-08-26T07:25:00.028Z] 🔍 Fetching data from Intuition API (attempt 1/3)...
+[2025-08-26T07:25:00.716Z] ✅ Successfully fetched data from Intuition API
+[2025-08-26T07:25:00.716Z] 📈 API Data Summary:
+[2025-08-26T07:25:00.717Z]   - Total Transactions: 3,074,298
+[2025-08-26T07:25:00.717Z]   - Transactions Today: 297,070
+[2025-08-26T07:25:00.717Z]   - Total Blocks: 1,443,531
+[2025-08-26T07:25:00.717Z]   - Total Addresses: 365,116
+[2025-08-26T07:25:00.717Z]   - Average Block Time: 371ms
+[2025-08-26T07:25:00.717Z] 📤 Updating Oracle with Intuition API data...
+[2025-08-26T07:25:00.717Z] 📊 Data to update: 3074298 total transactions
+[2025-08-26T07:25:00.752Z] ⏳ Transaction sent to Oracle, waiting for confirmation...
+[2025-08-26T07:25:00.752Z] 📋 Transaction hash: 0x96c173220a7c13a5d05b32eb877971b445e30a4891422a915fc5619719ad472c
+[2025-08-26T07:25:00.758Z] ✅ Oracle updated successfully!
+[2025-08-26T07:25:00.758Z] 📊 Updated with 3074298 total transactions
+[2025-08-26T07:25:00.758Z] ⛽ Gas used: 43303
+[2025-08-26T07:25:00.758Z] ⚖️ Checking for expired markets to resolve...
+[2025-08-26T07:25:00.773Z] ✅ No expired markets found
+[2025-08-26T07:25:00.774Z] ✅ Update cycle completed successfully
+
+[2025-08-26T07:30:00.038Z] 
+🔄 Starting update cycle...
+[2025-08-26T07:30:00.039Z] 🔍 Fetching data from Intuition API (attempt 1/3)...
+[2025-08-26T07:30:00.487Z] 
+📊 Service Performance Statistics
+[2025-08-26T07:30:00.488Z] ==================================
+[2025-08-26T07:30:00.488Z] ⏱️  Service Uptime: 897 seconds
+[2025-08-26T07:30:00.488Z] 📡 Total API Requests: 4
+[2025-08-26T07:30:00.488Z] ✅ Successful Requests: 3 (75.00%)
+[2025-08-26T07:30:00.488Z] ❌ Failed Requests: 0
+[2025-08-26T07:30:00.488Z] 🔄 Oracle Updates: 3
+[2025-08-26T07:30:00.488Z] ⚖️ Markets Resolved: 0
+[2025-08-26T07:30:00.488Z] ⏰ Last Success: 2025-08-26T07:25:00.716Z
+[2025-08-26T07:30:00.488Z] 🚨 Last Error: None
+[2025-08-26T07:30:00.488Z] 
+🔮 Oracle Status
+[2025-08-26T07:30:00.488Z] ================
+[2025-08-26T07:30:00.489Z] 📊 Current Transactions: 3074298
+[2025-08-26T07:30:00.490Z] ⏰ Data Fresh: true
+[2025-08-26T07:30:00.490Z] 📈 Total Markets Resolved: 0
+[2025-08-26T07:30:00.505Z] 💰 Total Distributed: 0.0 ETH
+[2025-08-26T07:30:00.505Z] 👥 Active Resolvers: 1
+[2025-08-26T07:30:00.736Z] ✅ Successfully fetched data from Intuition API
+[2025-08-26T07:30:00.736Z] 📈 API Data Summary:
+[2025-08-26T07:30:00.736Z]   - Total Transactions: 3,074,298
+[2025-08-26T07:30:00.737Z]   - Transactions Today: 297,070
+[2025-08-26T07:30:00.737Z]   - Total Blocks: 1,443,531
+[2025-08-26T07:30:00.737Z]   - Total Addresses: 365,116
+[2025-08-26T07:30:00.737Z]   - Average Block Time: 371ms
+[2025-08-26T07:30:00.737Z] 📤 Updating Oracle with Intuition API data...
+[2025-08-26T07:30:00.737Z] 📊 Data to update: 3074298 total transactions
+[2025-08-26T07:30:00.761Z] ⏳ Transaction sent to Oracle, waiting for confirmation...
+[2025-08-26T07:30:00.761Z] 📋 Transaction hash: 0x4f7c6b33daad3bee440ca4e01de79656f8b8e5de01d9d1309876821a716dd416
+[2025-08-26T07:30:00.766Z] ✅ Oracle updated successfully!
+[2025-08-26T07:30:00.767Z] 📊 Updated with 3074298 total transactions
+[2025-08-26T07:30:00.767Z] ⛽ Gas used: 40503
+[2025-08-26T07:30:00.767Z] ⚖️ Checking for expired markets to resolve...
+[2025-08-26T07:30:00.772Z] ✅ No expired markets found
+[2025-08-26T07:30:00.773Z] ✅ Update cycle completed successfully
+
+[2025-08-26T07:35:00.031Z] 
+🔄 Starting update cycle...
+[2025-08-26T07:35:00.032Z] 🔍 Fetching data from Intuition API (attempt 1/3)...
+[2025-08-26T07:35:00.646Z] ✅ Successfully fetched data from Intuition API
+[2025-08-26T07:35:00.646Z] 📈 API Data Summary:
+[2025-08-26T07:35:00.646Z]   - Total Transactions: 3,074,298
+[2025-08-26T07:35:00.646Z]   - Transactions Today: 297,070
+[2025-08-26T07:35:00.647Z]   - Total Blocks: 1,443,531
+[2025-08-26T07:35:00.647Z]   - Total Addresses: 365,116
+[2025-08-26T07:35:00.647Z]   - Average Block Time: 404ms
+[2025-08-26T07:35:00.647Z] 📤 Updating Oracle with Intuition API data...
+[2025-08-26T07:35:00.647Z] 📊 Data to update: 3074298 total transactions
+[2025-08-26T07:35:00.678Z] ⏳ Transaction sent to Oracle, waiting for confirmation...
+[2025-08-26T07:35:00.679Z] 📋 Transaction hash: 0x79be43902ae417ae950ae74299d602af99e8f94fb4f5171b4c57050607a48c2b
+[2025-08-26T07:35:00.690Z] ✅ Oracle updated successfully!
+[2025-08-26T07:35:00.690Z] 📊 Updated with 3074298 total transactions
+[2025-08-26T07:35:00.690Z] ⛽ Gas used: 40503
+[2025-08-26T07:35:00.690Z] ⚖️ Checking for expired markets to resolve...
+[2025-08-26T07:35:00.699Z] ✅ No expired markets found
+[2025-08-26T07:35:00.699Z] ✅ Update cycle completed successfully
+
+[2025-08-26T07:40:00.021Z] 
+🔄 Starting update cycle...
+[2025-08-26T07:40:00.021Z] 🔍 Fetching data from Intuition API (attempt 1/3)...
+[2025-08-26T07:40:00.661Z] ✅ Successfully fetched data from Intuition API
+[2025-08-26T07:40:00.661Z] 📈 API Data Summary:
+[2025-08-26T07:40:00.661Z]   - Total Transactions: 3,074,298
+[2025-08-26T07:40:00.661Z]   - Transactions Today: 297,070
+[2025-08-26T07:40:00.661Z]   - Total Blocks: 1,443,531
+[2025-08-26T07:40:00.661Z]   - Total Addresses: 365,116
+[2025-08-26T07:40:00.661Z]   - Average Block Time: 404ms
+[2025-08-26T07:40:00.662Z] 📤 Updating Oracle with Intuition API data...
+[2025-08-26T07:40:00.662Z] 📊 Data to update: 3074298 total transactions
+[2025-08-26T07:40:00.690Z] ⏳ Transaction sent to Oracle, waiting for confirmation...
+[2025-08-26T07:40:00.690Z] 📋 Transaction hash: 0xc5fa8d300f2525eca2a75de2bf5b67124207a890dd9189d894542a90a5b8f9bd
+[2025-08-26T07:40:00.696Z] ✅ Oracle updated successfully!
+[2025-08-26T07:40:00.696Z] 📊 Updated with 3074298 total transactions
+[2025-08-26T07:40:00.696Z] ⛽ Gas used: 40503
+[2025-08-26T07:40:00.697Z] ⚖️ Checking for expired markets to resolve...
+[2025-08-26T07:40:00.706Z] ✅ No expired markets found
+[2025-08-26T07:40:00.707Z] ✅ Update cycle completed successfully
+
+[2025-08-26T07:45:00.035Z] 
+🔄 Starting update cycle...
+[2025-08-26T07:45:00.035Z] 🔍 Fetching data from Intuition API (attempt 1/3)...
+[2025-08-26T07:45:00.713Z] ✅ Successfully fetched data from Intuition API
+[2025-08-26T07:45:00.713Z] 📈 API Data Summary:
+[2025-08-26T07:45:00.713Z]   - Total Transactions: 3,074,298
+[2025-08-26T07:45:00.714Z]   - Transactions Today: 297,070
+[2025-08-26T07:45:00.714Z]   - Total Blocks: 1,443,531
+[2025-08-26T07:45:00.714Z]   - Total Addresses: 365,655
+[2025-08-26T07:45:00.714Z]   - Average Block Time: 403ms
+[2025-08-26T07:45:00.714Z] 📤 Updating Oracle with Intuition API data...
+[2025-08-26T07:45:00.714Z] 📊 Data to update: 3074298 total transactions
+[2025-08-26T07:45:00.743Z] ⏳ Transaction sent to Oracle, waiting for confirmation...
+[2025-08-26T07:45:00.743Z] 📋 Transaction hash: 0x05a7953eeb608932554aa4fe66b55e193e0710d39437ac6da72dda2fc477c480
+[2025-08-26T07:45:00.748Z] ✅ Oracle updated successfully!
+[2025-08-26T07:45:00.748Z] 📊 Updated with 3074298 total transactions
+[2025-08-26T07:45:00.748Z] ⛽ Gas used: 40503
+[2025-08-26T07:45:00.748Z] ⚖️ Checking for expired markets to resolve...
+[2025-08-26T07:45:00.763Z] ✅ No expired markets found
+[2025-08-26T07:45:00.764Z] ✅ Update cycle completed successfully
+
+[2025-08-26T07:50:00.080Z] 
+🔄 Starting update cycle...
+[2025-08-26T07:50:00.081Z] 🔍 Fetching data from Intuition API (attempt 1/3)...
+[2025-08-26T07:50:00.697Z] ✅ Successfully fetched data from Intuition API
+[2025-08-26T07:50:00.697Z] 📈 API Data Summary:
+[2025-08-26T07:50:00.697Z]   - Total Transactions: 3,074,298
+[2025-08-26T07:50:00.698Z]   - Transactions Today: 297,070
+[2025-08-26T07:50:00.698Z]   - Total Blocks: 1,443,531
+[2025-08-26T07:50:00.698Z]   - Total Addresses: 365,655
+[2025-08-26T07:50:00.698Z]   - Average Block Time: 403ms
+[2025-08-26T07:50:00.698Z] 📤 Updating Oracle with Intuition API data...
+[2025-08-26T07:50:00.698Z] 📊 Data to update: 3074298 total transactions
+[2025-08-26T07:50:00.731Z] ⏳ Transaction sent to Oracle, waiting for confirmation...
+[2025-08-26T07:50:00.732Z] 📋 Transaction hash: 0x190f0bbaac405b1a8c5e00dc351a09ebdc69892a994e8fdcf2e56f00dc595771
+[2025-08-26T07:50:00.737Z] ✅ Oracle updated successfully!
+[2025-08-26T07:50:00.737Z] 📊 Updated with 3074298 total transactions
+[2025-08-26T07:50:00.738Z] ⛽ Gas used: 40503
+[2025-08-26T07:50:00.738Z] ⚖️ Checking for expired markets to resolve...
+[2025-08-26T07:50:00.747Z] ✅ No expired markets found
+[2025-08-26T07:50:00.747Z] ✅ Update cycle completed successfully
+
+[2025-08-26T07:52:20.180Z] 🛑 Stopping Intuition API Service...

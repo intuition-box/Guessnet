@@ -3,7 +3,38 @@
 import { useReadContract } from "wagmi";
 import { Address } from "viem";
 import React from "react";
-import { TRANSACTION_PREDICTION_MARKET_ABI } from "./contracts/TransactionPredictionMarketABI";
+import { TransactionPredictionMarketABI } from "~~/contracts/TransactionPredictionMarketABI";
+
+// Using full ABI from separate file
+const MARKET_READ_ABI = [
+  {
+    "inputs": [],
+    "name": "getMarketInfo",
+    "outputs": [
+      { "internalType": "address", "name": "creator", "type": "address" },
+      { "internalType": "address", "name": "oracle", "type": "address" },
+      { "internalType": "string", "name": "description", "type": "string" },
+      { "internalType": "uint256", "name": "threshold", "type": "uint256" },
+      { "internalType": "uint256", "name": "deadline", "type": "uint256" },
+      { "internalType": "uint256", "name": "createdAt", "type": "uint256" },
+      { "internalType": "uint8", "name": "status", "type": "uint8" },
+      { "internalType": "uint256", "name": "aboveBets", "type": "uint256" },
+      { "internalType": "uint256", "name": "belowBets", "type": "uint256" },
+      { "internalType": "uint256", "name": "bettorCount", "type": "uint256" },
+      { "internalType": "uint256", "name": "actualCount", "type": "uint256" },
+      { "internalType": "uint8", "name": "winningType", "type": "uint8" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getTotalValueLocked",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
 
 interface MarketReaderProps {
   marketAddress: Address;
@@ -11,16 +42,16 @@ interface MarketReaderProps {
 }
 
 export function MarketReader({ marketAddress, onMarketData }: MarketReaderProps) {
-  // Lecture des données du marché
+  // Lecture des données du marché avec l'ABI complet
   const { data: marketInfo, error: marketInfoError, isLoading: marketInfoLoading } = useReadContract({
     address: marketAddress,
-    abi: TRANSACTION_PREDICTION_MARKET_ABI,
+    abi: TransactionPredictionMarketABI,
     functionName: 'getMarketInfo',
   });
 
   const { data: totalValueLocked, error: tvlError, isLoading: tvlLoading } = useReadContract({
     address: marketAddress,
-    abi: TRANSACTION_PREDICTION_MARKET_ABI,
+    abi: TransactionPredictionMarketABI,
     functionName: 'getTotalValueLocked',
   });
 
@@ -32,8 +63,17 @@ export function MarketReader({ marketAddress, onMarketData }: MarketReaderProps)
       hasMarketInfo: !!marketInfo,
       hasTotalValueLocked: !!totalValueLocked,
       marketInfoError: marketInfoError?.message,
-      tvlError: tvlError?.message
+      tvlError: tvlError?.message,
+      marketAddress: marketAddress
     });
+
+    // Log raw contract read results
+    if (marketInfo) {
+      console.log(`📋 RAW marketInfo for ${marketAddress}:`, marketInfo);
+    }
+    if (totalValueLocked !== undefined) {
+      console.log(`💰 RAW totalValueLocked for ${marketAddress}:`, totalValueLocked);
+    }
   }, [marketAddress, marketInfoLoading, tvlLoading, marketInfo, totalValueLocked, marketInfoError, tvlError]);
 
   // Transmettre les données au composant parent

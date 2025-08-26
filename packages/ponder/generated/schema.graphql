@@ -1,0 +1,615 @@
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+scalar BigInt
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type Meta {
+  status: JSON
+}
+
+type Query {
+  factory(id: String!): factory
+  factorys(where: factoryFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): factoryPage!
+  market(id: String!): market
+  markets(where: marketFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): marketPage!
+  bet(id: String!): bet
+  bets(where: betFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): betPage!
+  user(id: String!): user
+  users(where: userFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): userPage!
+  oracle(id: String!): oracle
+  oracles(where: oracleFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): oraclePage!
+  marketStats(id: String!): marketStats
+  marketStatss(where: marketStatsFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): marketStatsPage!
+  _meta: Meta
+}
+
+type factory {
+  id: String!
+  defaultOracle: String!
+  totalMarketsCreated: BigInt!
+  activeMarketsCount: BigInt!
+  lastUpdated: BigInt!
+}
+
+type factoryPage {
+  items: [factory!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input factoryFilter {
+  AND: [factoryFilter]
+  OR: [factoryFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  defaultOracle: String
+  defaultOracle_not: String
+  defaultOracle_in: [String]
+  defaultOracle_not_in: [String]
+  defaultOracle_contains: String
+  defaultOracle_not_contains: String
+  defaultOracle_starts_with: String
+  defaultOracle_ends_with: String
+  defaultOracle_not_starts_with: String
+  defaultOracle_not_ends_with: String
+  totalMarketsCreated: BigInt
+  totalMarketsCreated_not: BigInt
+  totalMarketsCreated_in: [BigInt]
+  totalMarketsCreated_not_in: [BigInt]
+  totalMarketsCreated_gt: BigInt
+  totalMarketsCreated_lt: BigInt
+  totalMarketsCreated_gte: BigInt
+  totalMarketsCreated_lte: BigInt
+  activeMarketsCount: BigInt
+  activeMarketsCount_not: BigInt
+  activeMarketsCount_in: [BigInt]
+  activeMarketsCount_not_in: [BigInt]
+  activeMarketsCount_gt: BigInt
+  activeMarketsCount_lt: BigInt
+  activeMarketsCount_gte: BigInt
+  activeMarketsCount_lte: BigInt
+  lastUpdated: BigInt
+  lastUpdated_not: BigInt
+  lastUpdated_in: [BigInt]
+  lastUpdated_not_in: [BigInt]
+  lastUpdated_gt: BigInt
+  lastUpdated_lt: BigInt
+  lastUpdated_gte: BigInt
+  lastUpdated_lte: BigInt
+}
+
+type market {
+  id: String!
+  factoryAddress: String!
+  creator: String!
+  oracle: String!
+  description: String!
+  transactionThreshold: BigInt!
+  deadline: BigInt!
+  createdAt: BigInt!
+  status: String!
+  isActive: Boolean!
+  totalAboveBets: BigInt!
+  totalBelowBets: BigInt!
+  totalBets: BigInt!
+  bettorsCount: Int!
+  resolvedAt: BigInt
+  actualTransactionCount: BigInt
+  winningType: String
+  totalClaimed: BigInt
+}
+
+type marketPage {
+  items: [market!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input marketFilter {
+  AND: [marketFilter]
+  OR: [marketFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  factoryAddress: String
+  factoryAddress_not: String
+  factoryAddress_in: [String]
+  factoryAddress_not_in: [String]
+  factoryAddress_contains: String
+  factoryAddress_not_contains: String
+  factoryAddress_starts_with: String
+  factoryAddress_ends_with: String
+  factoryAddress_not_starts_with: String
+  factoryAddress_not_ends_with: String
+  creator: String
+  creator_not: String
+  creator_in: [String]
+  creator_not_in: [String]
+  creator_contains: String
+  creator_not_contains: String
+  creator_starts_with: String
+  creator_ends_with: String
+  creator_not_starts_with: String
+  creator_not_ends_with: String
+  oracle: String
+  oracle_not: String
+  oracle_in: [String]
+  oracle_not_in: [String]
+  oracle_contains: String
+  oracle_not_contains: String
+  oracle_starts_with: String
+  oracle_ends_with: String
+  oracle_not_starts_with: String
+  oracle_not_ends_with: String
+  description: String
+  description_not: String
+  description_in: [String]
+  description_not_in: [String]
+  description_contains: String
+  description_not_contains: String
+  description_starts_with: String
+  description_ends_with: String
+  description_not_starts_with: String
+  description_not_ends_with: String
+  transactionThreshold: BigInt
+  transactionThreshold_not: BigInt
+  transactionThreshold_in: [BigInt]
+  transactionThreshold_not_in: [BigInt]
+  transactionThreshold_gt: BigInt
+  transactionThreshold_lt: BigInt
+  transactionThreshold_gte: BigInt
+  transactionThreshold_lte: BigInt
+  deadline: BigInt
+  deadline_not: BigInt
+  deadline_in: [BigInt]
+  deadline_not_in: [BigInt]
+  deadline_gt: BigInt
+  deadline_lt: BigInt
+  deadline_gte: BigInt
+  deadline_lte: BigInt
+  createdAt: BigInt
+  createdAt_not: BigInt
+  createdAt_in: [BigInt]
+  createdAt_not_in: [BigInt]
+  createdAt_gt: BigInt
+  createdAt_lt: BigInt
+  createdAt_gte: BigInt
+  createdAt_lte: BigInt
+  status: String
+  status_not: String
+  status_in: [String]
+  status_not_in: [String]
+  status_contains: String
+  status_not_contains: String
+  status_starts_with: String
+  status_ends_with: String
+  status_not_starts_with: String
+  status_not_ends_with: String
+  isActive: Boolean
+  isActive_not: Boolean
+  isActive_in: [Boolean]
+  isActive_not_in: [Boolean]
+  totalAboveBets: BigInt
+  totalAboveBets_not: BigInt
+  totalAboveBets_in: [BigInt]
+  totalAboveBets_not_in: [BigInt]
+  totalAboveBets_gt: BigInt
+  totalAboveBets_lt: BigInt
+  totalAboveBets_gte: BigInt
+  totalAboveBets_lte: BigInt
+  totalBelowBets: BigInt
+  totalBelowBets_not: BigInt
+  totalBelowBets_in: [BigInt]
+  totalBelowBets_not_in: [BigInt]
+  totalBelowBets_gt: BigInt
+  totalBelowBets_lt: BigInt
+  totalBelowBets_gte: BigInt
+  totalBelowBets_lte: BigInt
+  totalBets: BigInt
+  totalBets_not: BigInt
+  totalBets_in: [BigInt]
+  totalBets_not_in: [BigInt]
+  totalBets_gt: BigInt
+  totalBets_lt: BigInt
+  totalBets_gte: BigInt
+  totalBets_lte: BigInt
+  bettorsCount: Int
+  bettorsCount_not: Int
+  bettorsCount_in: [Int]
+  bettorsCount_not_in: [Int]
+  bettorsCount_gt: Int
+  bettorsCount_lt: Int
+  bettorsCount_gte: Int
+  bettorsCount_lte: Int
+  resolvedAt: BigInt
+  resolvedAt_not: BigInt
+  resolvedAt_in: [BigInt]
+  resolvedAt_not_in: [BigInt]
+  resolvedAt_gt: BigInt
+  resolvedAt_lt: BigInt
+  resolvedAt_gte: BigInt
+  resolvedAt_lte: BigInt
+  actualTransactionCount: BigInt
+  actualTransactionCount_not: BigInt
+  actualTransactionCount_in: [BigInt]
+  actualTransactionCount_not_in: [BigInt]
+  actualTransactionCount_gt: BigInt
+  actualTransactionCount_lt: BigInt
+  actualTransactionCount_gte: BigInt
+  actualTransactionCount_lte: BigInt
+  winningType: String
+  winningType_not: String
+  winningType_in: [String]
+  winningType_not_in: [String]
+  winningType_contains: String
+  winningType_not_contains: String
+  winningType_starts_with: String
+  winningType_ends_with: String
+  winningType_not_starts_with: String
+  winningType_not_ends_with: String
+  totalClaimed: BigInt
+  totalClaimed_not: BigInt
+  totalClaimed_in: [BigInt]
+  totalClaimed_not_in: [BigInt]
+  totalClaimed_gt: BigInt
+  totalClaimed_lt: BigInt
+  totalClaimed_gte: BigInt
+  totalClaimed_lte: BigInt
+}
+
+type bet {
+  id: String!
+  marketAddress: String!
+  bettor: String!
+  amount: BigInt!
+  betType: String!
+  timestamp: BigInt!
+  claimed: Boolean!
+  claimedAt: BigInt
+  winnings: BigInt
+  marketId: String!
+}
+
+type betPage {
+  items: [bet!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input betFilter {
+  AND: [betFilter]
+  OR: [betFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  marketAddress: String
+  marketAddress_not: String
+  marketAddress_in: [String]
+  marketAddress_not_in: [String]
+  marketAddress_contains: String
+  marketAddress_not_contains: String
+  marketAddress_starts_with: String
+  marketAddress_ends_with: String
+  marketAddress_not_starts_with: String
+  marketAddress_not_ends_with: String
+  bettor: String
+  bettor_not: String
+  bettor_in: [String]
+  bettor_not_in: [String]
+  bettor_contains: String
+  bettor_not_contains: String
+  bettor_starts_with: String
+  bettor_ends_with: String
+  bettor_not_starts_with: String
+  bettor_not_ends_with: String
+  amount: BigInt
+  amount_not: BigInt
+  amount_in: [BigInt]
+  amount_not_in: [BigInt]
+  amount_gt: BigInt
+  amount_lt: BigInt
+  amount_gte: BigInt
+  amount_lte: BigInt
+  betType: String
+  betType_not: String
+  betType_in: [String]
+  betType_not_in: [String]
+  betType_contains: String
+  betType_not_contains: String
+  betType_starts_with: String
+  betType_ends_with: String
+  betType_not_starts_with: String
+  betType_not_ends_with: String
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+  claimed: Boolean
+  claimed_not: Boolean
+  claimed_in: [Boolean]
+  claimed_not_in: [Boolean]
+  claimedAt: BigInt
+  claimedAt_not: BigInt
+  claimedAt_in: [BigInt]
+  claimedAt_not_in: [BigInt]
+  claimedAt_gt: BigInt
+  claimedAt_lt: BigInt
+  claimedAt_gte: BigInt
+  claimedAt_lte: BigInt
+  winnings: BigInt
+  winnings_not: BigInt
+  winnings_in: [BigInt]
+  winnings_not_in: [BigInt]
+  winnings_gt: BigInt
+  winnings_lt: BigInt
+  winnings_gte: BigInt
+  winnings_lte: BigInt
+  marketId: String
+  marketId_not: String
+  marketId_in: [String]
+  marketId_not_in: [String]
+  marketId_contains: String
+  marketId_not_contains: String
+  marketId_starts_with: String
+  marketId_ends_with: String
+  marketId_not_starts_with: String
+  marketId_not_ends_with: String
+}
+
+type user {
+  id: String!
+  totalBetsPlaced: BigInt!
+  totalWinnings: BigInt!
+  totalMarketsCreated: Int!
+  betsWon: Int!
+  betsLost: Int!
+  lastActivity: BigInt!
+}
+
+type userPage {
+  items: [user!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input userFilter {
+  AND: [userFilter]
+  OR: [userFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  totalBetsPlaced: BigInt
+  totalBetsPlaced_not: BigInt
+  totalBetsPlaced_in: [BigInt]
+  totalBetsPlaced_not_in: [BigInt]
+  totalBetsPlaced_gt: BigInt
+  totalBetsPlaced_lt: BigInt
+  totalBetsPlaced_gte: BigInt
+  totalBetsPlaced_lte: BigInt
+  totalWinnings: BigInt
+  totalWinnings_not: BigInt
+  totalWinnings_in: [BigInt]
+  totalWinnings_not_in: [BigInt]
+  totalWinnings_gt: BigInt
+  totalWinnings_lt: BigInt
+  totalWinnings_gte: BigInt
+  totalWinnings_lte: BigInt
+  totalMarketsCreated: Int
+  totalMarketsCreated_not: Int
+  totalMarketsCreated_in: [Int]
+  totalMarketsCreated_not_in: [Int]
+  totalMarketsCreated_gt: Int
+  totalMarketsCreated_lt: Int
+  totalMarketsCreated_gte: Int
+  totalMarketsCreated_lte: Int
+  betsWon: Int
+  betsWon_not: Int
+  betsWon_in: [Int]
+  betsWon_not_in: [Int]
+  betsWon_gt: Int
+  betsWon_lt: Int
+  betsWon_gte: Int
+  betsWon_lte: Int
+  betsLost: Int
+  betsLost_not: Int
+  betsLost_in: [Int]
+  betsLost_not_in: [Int]
+  betsLost_gt: Int
+  betsLost_lt: Int
+  betsLost_gte: Int
+  betsLost_lte: Int
+  lastActivity: BigInt
+  lastActivity_not: BigInt
+  lastActivity_in: [BigInt]
+  lastActivity_not_in: [BigInt]
+  lastActivity_gt: BigInt
+  lastActivity_lt: BigInt
+  lastActivity_gte: BigInt
+  lastActivity_lte: BigInt
+}
+
+type oracle {
+  id: String!
+  totalMarketsResolved: Int!
+  lastResolvedAt: BigInt
+  assignedMarketsCount: Int!
+}
+
+type oraclePage {
+  items: [oracle!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input oracleFilter {
+  AND: [oracleFilter]
+  OR: [oracleFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  totalMarketsResolved: Int
+  totalMarketsResolved_not: Int
+  totalMarketsResolved_in: [Int]
+  totalMarketsResolved_not_in: [Int]
+  totalMarketsResolved_gt: Int
+  totalMarketsResolved_lt: Int
+  totalMarketsResolved_gte: Int
+  totalMarketsResolved_lte: Int
+  lastResolvedAt: BigInt
+  lastResolvedAt_not: BigInt
+  lastResolvedAt_in: [BigInt]
+  lastResolvedAt_not_in: [BigInt]
+  lastResolvedAt_gt: BigInt
+  lastResolvedAt_lt: BigInt
+  lastResolvedAt_gte: BigInt
+  lastResolvedAt_lte: BigInt
+  assignedMarketsCount: Int
+  assignedMarketsCount_not: Int
+  assignedMarketsCount_in: [Int]
+  assignedMarketsCount_not_in: [Int]
+  assignedMarketsCount_gt: Int
+  assignedMarketsCount_lt: Int
+  assignedMarketsCount_gte: Int
+  assignedMarketsCount_lte: Int
+}
+
+type marketStats {
+  id: String!
+  marketAddress: String!
+  timestamp: BigInt!
+  hourlyVolume: BigInt!
+  hourlyBetsCount: Int!
+  aboveBetsRatio: Float!
+  belowBetsRatio: Float!
+  marketId: String!
+}
+
+type marketStatsPage {
+  items: [marketStats!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input marketStatsFilter {
+  AND: [marketStatsFilter]
+  OR: [marketStatsFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  marketAddress: String
+  marketAddress_not: String
+  marketAddress_in: [String]
+  marketAddress_not_in: [String]
+  marketAddress_contains: String
+  marketAddress_not_contains: String
+  marketAddress_starts_with: String
+  marketAddress_ends_with: String
+  marketAddress_not_starts_with: String
+  marketAddress_not_ends_with: String
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+  hourlyVolume: BigInt
+  hourlyVolume_not: BigInt
+  hourlyVolume_in: [BigInt]
+  hourlyVolume_not_in: [BigInt]
+  hourlyVolume_gt: BigInt
+  hourlyVolume_lt: BigInt
+  hourlyVolume_gte: BigInt
+  hourlyVolume_lte: BigInt
+  hourlyBetsCount: Int
+  hourlyBetsCount_not: Int
+  hourlyBetsCount_in: [Int]
+  hourlyBetsCount_not_in: [Int]
+  hourlyBetsCount_gt: Int
+  hourlyBetsCount_lt: Int
+  hourlyBetsCount_gte: Int
+  hourlyBetsCount_lte: Int
+  aboveBetsRatio: Float
+  aboveBetsRatio_not: Float
+  aboveBetsRatio_in: [Float]
+  aboveBetsRatio_not_in: [Float]
+  aboveBetsRatio_gt: Float
+  aboveBetsRatio_lt: Float
+  aboveBetsRatio_gte: Float
+  aboveBetsRatio_lte: Float
+  belowBetsRatio: Float
+  belowBetsRatio_not: Float
+  belowBetsRatio_in: [Float]
+  belowBetsRatio_not_in: [Float]
+  belowBetsRatio_gt: Float
+  belowBetsRatio_lt: Float
+  belowBetsRatio_gte: Float
+  belowBetsRatio_lte: Float
+  marketId: String
+  marketId_not: String
+  marketId_in: [String]
+  marketId_not_in: [String]
+  marketId_contains: String
+  marketId_not_contains: String
+  marketId_starts_with: String
+  marketId_ends_with: String
+  marketId_not_starts_with: String
+  marketId_not_ends_with: String
+}

@@ -7,9 +7,10 @@ import { notification } from "~~/utils/scaffold-eth";
 import deployedContracts from "~~/contracts/deployedContracts";
 import { formatEther, parseEther, Address } from "viem";  
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { MarketReader } from "./prediction-markets/MarketReader";
+import { usePonderQuery, GET_ALL_MARKETS } from "~~/hooks/usePonderQuery";
 import { useWriteContract } from "wagmi";
-import { TRANSACTION_PREDICTION_MARKET_ABI } from "./prediction-markets/contracts/TransactionPredictionMarketABI";
+// Using deployed contracts ABI instead of manual ABI
+// import { TRANSACTION_PREDICTION_MARKET_ABI } from "./prediction-markets/contracts/TransactionPredictionMarketABI";
 import type { NextPage } from "next";
 
 interface Market {
@@ -33,49 +34,62 @@ const Home: NextPage = () => {
   const [markets, setMarkets] = useState<Market[]>([]);
   const [transactionThreshold, setTransactionThreshold] = useState("");
   const [selectedHours, setSelectedHours] = useState(2);
-  const [initialLiquidity, setInitialLiquidity] = useState("");
+  const [initialLiquidity, setInitialLiquidity] = useState("0.1");
   const [selectedMarket, setSelectedMarket] = useState("");
   const [betAmount, setBetAmount] = useState("");
   const [betType, setBetType] = useState(0); // 0 = ABOVE, 1 = BELOW
   const [apiData, setApiData] = useState<ApiDataPoint[]>([]);
   const [currentTransactions, setCurrentTransactions] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  // Récupérer tous les marchés depuis la Factory
-  const { data: allMarkets, refetch: refetchMarkets } = useScaffoldReadContract({
-    contractName: "PredictionMarketFactory",
-    functionName: "getAllMarkets",
-  });
-
-  // Hook to get market info from factory for first market as example
-  const firstMarketAddress = allMarkets?.[0] as Address | undefined;
-  const { data: factoryMarketInfo } = useScaffoldReadContract({
-    contractName: "PredictionMarketFactory",
-    functionName: "getMarketInfoByAddress",
-    args: firstMarketAddress ? [firstMarketAddress] : undefined,
-    enabled: !!firstMarketAddress
-  });
+  // Récupérer les données des marchés depuis Ponder
+  const { data: ponderData, isLoading: isPonderLoading, error: ponderError, refetch: refetchPonder } = usePonderQuery(GET_ALL_MARKETS);
 
   // REMOVED: getMarketDetails function - we now use only real data from MarketReader components
   // No more placeholder data, only real blockchain data
 
-  // Initialize empty markets array when allMarkets changes
-  // Real data will be populated by MarketReader components via handleMarketData callback
+  // Update markets with Ponder data
   useEffect(() => {
-    console.log("🔄 Markets from Factory changed...");
-    console.log("allMarkets from Factory:", allMarkets);
-    console.log("Deployed contracts:", deployedContracts);
-    const factoryAddress = deployedContracts?.[31337]?.PredictionMarketFactory?.address;
-    console.log("Factory address:", factoryAddress);
+    console.log("🔄 Ponder data changed:", { ponderData, isPonderLoading, ponderError });
     
-    if (allMarkets && allMarkets.length > 0) {
-      console.log(`📊 Found ${allMarkets.length} markets from Factory - waiting for MarketReader data...`);
-      // Clear markets, will be populated by MarketReader components
-      setMarkets([]);
-    } else {
-      console.log("⚠️ No markets from Factory - clearing market list");
+    if (ponderData?.markets?.items) {
+      console.log("🔍 RAW Ponder data:", ponderData.markets.items);
+      
+      const ponderMarkets = ponderData.markets.items.map((market: any) => {
+        console.log(`🔍 Processing market ${market.id}:`, {
+          rawTransactionThreshold: market.transactionThreshold,
+          typeOfThreshold: typeof market.transactionThreshold,
+          rawDescription: market.description
+        });
+        
+        return {
+          address: market.id,
+          description: market.description || `Market ${market.id.slice(0, 8)}...`,
+          threshold: BigInt(market.transactionThreshold || 0),
+          deadline: BigInt(market.deadline || 0),
+          status: market.status === "ACTIVE" ? 0 : 1,
+          totalValueLocked: BigInt(market.totalBets || 0),
+          aboveBets: BigInt(market.totalAboveBets || 0),
+          belowBets: BigInt(market.totalBelowBets || 0)
+        };
+      });
+      
+      console.log(`📊 Setting markets from Ponder:`, ponderMarkets.map(m => ({
+        address: m.address.slice(0, 10),
+        threshold: m.threshold.toString(),
+        description: m.description,
+        aboveBets: m.aboveBets.toString(),
+        belowBets: m.belowBets.toString(),
+        totalBets: m.totalValueLocked.toString()
+      })));
+      
+      setMarkets(ponderMarkets);
+      setRefreshKey(Date.now()); // Force component refresh
+    } else if (!isPonderLoading) {
+      console.log("⚠️ No markets from Ponder or still loading");
       setMarkets([]);
     }
-  }, [allMarkets]);
+  }, [ponderData, isPonderLoading, ponderError]);
 
   // Fetch API data for chart
   useEffect(() => {
@@ -124,17 +138,32 @@ const Home: NextPage = () => {
     }
 
     try {
-      const thresholdBigInt = BigInt(parseInt(transactionThreshold.replace(/,/g, '')));
+      const cleanThreshold = transactionThreshold.replace(/[\s,]/g, '');
+      const thresholdBigInt = BigInt(parseInt(cleanThreshold));
       const deadlineTimestamp = Math.floor(Date.now() / 1000) + (selectedHours * 3600);
       const oracleAddress = deployedContracts?.[31337]?.PredictionMarketOracle?.address || "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82";
       
-      const description = `Will Intuition have more than ${formatLargeNumber(transactionThreshold)} transactions in ${selectedHours} hours?`;
+      const description = `Will Intuition have more than ${formatLargeNumber(cleanThreshold)} transactions in ${selectedHours} hours?`;
       
       console.log("Creating market with params:", {
         description,
         threshold: transactionThreshold,
+        thresholdBigInt: thresholdBigInt.toString(),
         deadline: deadlineTimestamp,
         oracle: oracleAddress
+      });
+
+      console.log("🔧 Final contract args:", [
+        description,
+        thresholdBigInt,
+        BigInt(deadlineTimestamp),
+        oracleAddress
+      ]);
+
+      console.log("💰 DEBUG Initial Liquidity:", {
+        initialLiquidity,
+        hasValue: !!initialLiquidity,
+        parsedValue: initialLiquidity ? parseEther(initialLiquidity) : BigInt(0)
       });
 
       await createMarket({
@@ -150,15 +179,15 @@ const Home: NextPage = () => {
 
       notification.success("Market created successfully!");
       
-      // Refresh markets list
+      // Refresh markets from Ponder
       setTimeout(() => {
-        refetchMarkets();
+        refetchPonder();
       }, 2000);
       
       // Reset form
       setTransactionThreshold("");
       setSelectedHours(2);
-      setInitialLiquidity("");
+      setInitialLiquidity("0.1");
       
     } catch (error: any) {
       notification.error(`Failed to create market: ${error.message}`);
@@ -174,20 +203,19 @@ const Home: NextPage = () => {
       return;
     }
 
-    // VALIDATION: Check if selected market is in allMarkets array from Factory
+    // VALIDATION: Check if selected market exists in Ponder data
     console.log("🔍 DEBUG - Validating market selection:");
     console.log("Selected Market:", selectedMarket);
-    console.log("All Markets from Factory:", allMarkets);
-    const factoryAddress = deployedContracts?.[31337]?.PredictionMarketFactory?.address;
-    console.log("Factory Address:", factoryAddress);
+    console.log("All Markets from Ponder:", markets.map(m => m.address));
     
-    if (!allMarkets || !allMarkets.includes(selectedMarket)) {
-      console.error("❌ VALIDATION FAILED: Selected market not in Factory's market list!");
-      notification.error(`Invalid market selection. Market ${selectedMarket} is not in Factory's list.`);
+    const selectedMarketData = markets.find(m => m.address === selectedMarket);
+    if (!selectedMarketData) {
+      console.error("❌ VALIDATION FAILED: Selected market not found in Ponder data!");
+      notification.error(`Invalid market selection. Market ${selectedMarket} not found in Ponder.`);
       return;
     }
 
-    console.log("✅ VALIDATION PASSED: Market exists in Factory's list");
+    console.log("✅ VALIDATION PASSED: Market exists in Ponder data:", selectedMarketData);
 
     try {
       notification.loading("Placing bet...");
@@ -197,30 +225,37 @@ const Home: NextPage = () => {
         betType: betType, // 0 = ABOVE, 1 = BELOW
         amount: betAmount,
         value: parseEther(betAmount),
-        factoryMarkets: allMarkets,
-        isValidMarket: allMarkets?.includes(selectedMarket)
+        marketData: selectedMarketData,
+        threshold: selectedMarketData.threshold.toString()
       });
       
-      // Call the real placeBet function on VALIDATED TransactionPredictionMarket contract
-      await writeContractAsync({
+      console.log("🔧 Using TransactionPredictionMarket ABI...");
+      
+      const { TransactionPredictionMarketABI } = await import("~~/contracts/TransactionPredictionMarketABI");
+      
+      const result = await writeContractAsync({
         address: selectedMarket as Address,
-        abi: TRANSACTION_PREDICTION_MARKET_ABI,
+        abi: TransactionPredictionMarketABI,
         functionName: "placeBet",
         args: [betType], // 0 for ABOVE_THRESHOLD, 1 for BELOW_THRESHOLD
         value: parseEther(betAmount),
       });
       
+      console.log("✅ Transaction completed:", result);
+      
+      notification.remove(); // Remove loading notification
       notification.success(`🎯 Real bet placed: ${betAmount} ETH on ${betType === 0 ? 'ABOVE' : 'BELOW'} threshold!`);
       setBetAmount("");
       setSelectedMarket("");
       
-      // Refresh markets after bet
+      // Refresh markets from Ponder after bet
       setTimeout(() => {
-        refetchMarkets();
+        refetchPonder();
       }, 3000);
       
     } catch (error: any) {
       console.error("Bet placement error:", error);
+      notification.remove(); // Remove loading notification
       notification.error(`Failed to place bet: ${error.shortMessage || error.message || error}`);
     }
   };
@@ -233,83 +268,46 @@ const Home: NextPage = () => {
     return parseInt(num).toLocaleString();
   };
 
-  // Callback pour recevoir les données des marchés
-  const handleMarketData = useCallback((marketData: any) => {
-    console.log("📊 Real market data received:", {
-      address: marketData.address,
-      threshold: marketData.threshold?.toString(),
-      description: marketData.description,
-      totalValueLocked: marketData.totalValueLocked?.toString(),
-      aboveBets: marketData.aboveBets?.toString(),
-      belowBets: marketData.belowBets?.toString()
-    });
-    
-    setMarkets(prev => {
-      const filtered = prev.filter(m => m.address !== marketData.address);
-      const newMarket: Market = {
-        address: marketData.address,
-        description: marketData.description || `Market ${marketData.address.slice(0, 8)}...`,
-        threshold: marketData.threshold || BigInt(0),
-        deadline: marketData.deadline || BigInt(0),
-        status: marketData.status || 0,
-        totalValueLocked: marketData.totalValueLocked || BigInt(0),
-        aboveBets: marketData.aboveBets || BigInt(0),
-        belowBets: marketData.belowBets || BigInt(0)
-      };
-      
-      console.log(`✅ Market updated: ${newMarket.address.slice(0, 10)}... - Threshold: ${newMarket.threshold.toString()}`);
-      return [...filtered, newMarket];
-    });
-  }, []);
 
   return (
     <div className="min-h-screen bg-gray-900">
       <div className="container mx-auto px-4 py-8">
-        {/* Composants pour lire les données de chaque marché */}
-        {allMarkets?.map((marketAddress) => (
-          <MarketReader 
-            key={marketAddress} 
-            marketAddress={marketAddress as Address}
-            onMarketData={handleMarketData}
-          />
-        ))}
         
         <h1 className="text-4xl font-bold text-center mb-8 text-gray-100">
           🔮 Prediction Markets - Intuition Blockchain
         </h1>
 
         {/* Market Cache Management */}
-        <div className="card bg-gray-700 shadow-xl mb-6 border border-gray-600">
+        <div className="card bg-white shadow-xl mb-6 border border-gray-200">
           <div className="card-body py-4">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="stats stats-vertical sm:stats-horizontal bg-gray-600 text-gray-100 shadow">
+                <div className="stats stats-vertical sm:stats-horizontal bg-gray-100 text-gray-800 shadow">
                   <div className="stat">
-                    <div className="stat-title text-gray-300">Factory Markets</div>
-                    <div className="stat-value text-sm text-gray-100">{allMarkets?.length || 0}</div>
-                    <div className="stat-desc text-gray-400">From Factory Contract</div>
+                    <div className="stat-title text-gray-600">Ponder Status</div>
+                    <div className="stat-value text-sm text-gray-800">
+                      {isPonderLoading ? "Loading..." : ponderError ? "Error" : "Connected"}
+                    </div>
+                    <div className="stat-desc text-gray-500">From Ponder GraphQL</div>
                   </div>
                   <div className="stat">
-                    <div className="stat-title text-gray-300">Loaded Markets</div>
-                    <div className="stat-value text-sm text-gray-100">{markets.length}</div>
-                    <div className="stat-desc text-gray-400">With Market Data</div>
+                    <div className="stat-title text-gray-600">Total Markets</div>
+                    <div className="stat-value text-sm text-gray-800">{markets.length}</div>
+                    <div className="stat-desc text-gray-500">Indexed by Ponder</div>
                   </div>
                 </div>
               </div>
               
               <button 
-                className="btn bg-gray-500 hover:bg-gray-400 text-gray-100 border-gray-500 hover:border-gray-400"
+                className="btn bg-blue-600 hover:bg-blue-700 hover:shadow-lg text-white border-blue-600 hover:border-blue-700 transition-all duration-200"
                 onClick={async () => {
-                  console.log("🔄 Manual refresh triggered");
-                  // Clear current markets
-                  setMarkets([]);
+                  console.log("🔄 Manual refresh from Ponder triggered");
                   setSelectedMarket("");
-                  // Refetch from Factory
-                  await refetchMarkets();
-                  notification.info("Markets refreshed from Factory");
+                  await refetchPonder();
+                  notification.info("Markets refreshed from Ponder");
                 }}
               >
-                🔄 Refresh Markets
+                🔄 Refresh from Ponder
               </button>
             </div>
           </div>
@@ -317,25 +315,25 @@ const Home: NextPage = () => {
 
         <div className="grid lg:grid-cols-2 gap-8 mb-8">
           {/* Create Market Form */}
-          <div className="card bg-gray-700 shadow-xl border border-gray-600">
+          <div className="card bg-white shadow-xl border border-gray-200">
             <div className="card-body">
-              <h2 className="card-title text-2xl mb-4 text-gray-100">📈 Create New Market</h2>
+              <h2 className="card-title text-2xl mb-4 text-gray-800">📈 Create New Market</h2>
               
               <div className="form-control mb-4">
                 <label className="label">
-                  <span className="label-text font-semibold text-gray-200">Transaction Threshold</span>
+                  <span className="label-text font-semibold text-gray-700">Transaction Threshold</span>
                 </label>
                 <input
                   type="text"
-                  placeholder="2,850,000"
-                  className="input input-bordered bg-gray-600 border-gray-500 text-gray-100 placeholder-gray-400 focus:border-gray-400 mb-2"
+                  placeholder={currentTransactions > 0 ? `${formatLargeNumber((currentTransactions + 50000).toString())}` : "2,850,000"}
+                  className="input input-bordered bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-400 focus:border-gray-500 mb-2"
                   value={transactionThreshold}
                   onChange={(e) => setTransactionThreshold(e.target.value)}
                 />
                 
                 {/* Quick increment buttons - Based on current real transactions */}
                 <div className="flex flex-wrap gap-1 mb-2">
-                  <div className="text-xs text-gray-400 w-full mb-1">
+                  <div className="text-xs text-gray-500 w-full mb-1">
                     Actuelle: {formatLargeNumber(currentTransactions.toString())} transactions
                   </div>
                   {[
@@ -349,9 +347,12 @@ const Home: NextPage = () => {
                     <button
                       key={label}
                       type="button"
-                      className="btn btn-xs bg-gray-500 hover:bg-gray-400 text-gray-100 border-gray-500 hover:border-gray-400"
+                      className="btn btn-xs bg-gray-100 hover:bg-gray-800 hover:text-white text-gray-700 border-gray-300 transition-all duration-200"
                       onClick={() => {
-                        const newValue = currentTransactions + value;
+                        const currentValue = transactionThreshold ? 
+                          parseInt(transactionThreshold.replace(/[\s,]/g, '')) : 
+                          currentTransactions;
+                        const newValue = currentValue + value;
                         setTransactionThreshold(newValue.toLocaleString());
                       }}
                     >
@@ -361,19 +362,19 @@ const Home: NextPage = () => {
                 </div>
                 
                 <label className="label">
-                  <span className="label-text-alt text-gray-400">Users will bet if Intuition exceeds this number</span>
+                  <span className="label-text-alt text-gray-500">Users will bet if Intuition exceeds this number</span>
                 </label>
               </div>
 
               <div className="form-control mb-4">
                 <label className="label">
-                  <span className="label-text font-semibold text-gray-200">Duration</span>
+                  <span className="label-text font-semibold text-gray-700">Duration</span>
                 </label>
                 <div className="btn-group">
                   {[1, 2, 5, 12, 24].map(hours => (
                     <button 
                       key={hours}
-                      className={`btn ${selectedHours === hours ? 'bg-gray-500 border-gray-500 text-gray-100' : 'btn-outline border-gray-500 text-gray-300 hover:bg-gray-600 hover:border-gray-400'}`}
+                      className={`btn ${selectedHours === hours ? 'bg-gray-900 border-gray-900 text-white hover:bg-black' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-800 hover:text-white hover:border-gray-800'} transition-all duration-200`}
                       onClick={() => setSelectedHours(hours)}
                     >
                       +{hours}h
@@ -384,7 +385,7 @@ const Home: NextPage = () => {
 
               <div className="form-control mb-4">
                 <label className="label">
-                  <span className="label-text font-semibold text-gray-200">Initial Liquidity (Optional)</span>
+                  <span className="label-text font-semibold text-gray-700">Initial Liquidity (Optional)</span>
                 </label>
                 <EtherInput
                   value={initialLiquidity}
@@ -392,12 +393,12 @@ const Home: NextPage = () => {
                   placeholder="0.1"
                 />
                 <label className="label">
-                  <span className="label-text-alt text-gray-400">Add ETH to provide initial liquidity to your market</span>
+                  <span className="label-text-alt text-gray-500">Add ETH to provide initial liquidity to your market</span>
                 </label>
               </div>
 
               <button 
-                className="btn bg-gray-500 hover:bg-gray-400 text-gray-100 border-gray-500 hover:border-gray-400 btn-block"
+                className="btn bg-green-600 hover:bg-green-700 hover:shadow-lg hover:scale-105 text-white border-green-600 hover:border-green-700 btn-block transition-all duration-200 font-bold"
                 onClick={createMarketReal}
                 disabled={!transactionThreshold || !selectedHours}
               >
@@ -407,15 +408,15 @@ const Home: NextPage = () => {
           </div>
 
           {/* Real-time Chart */}
-          <div className="card bg-gray-700 shadow-xl border border-gray-600">
+          <div className="card bg-white shadow-xl border border-gray-200">
             <div className="card-body">
-              <h2 className="card-title text-2xl mb-4 text-gray-100">📊 Live Transaction Data</h2>
+              <h2 className="card-title text-2xl mb-4 text-gray-800">📊 Live Transaction Data</h2>
               
-              <div className="stats stats-vertical lg:stats-horizontal bg-gray-600 text-gray-100 shadow mb-4">
+              <div className="stats stats-vertical lg:stats-horizontal bg-gray-100 text-gray-800 shadow mb-4">
                 <div className="stat">
-                  <div className="stat-title text-gray-300">Current Transactions</div>
-                  <div className="stat-value text-gray-100">{formatLargeNumber(currentTransactions.toString())}</div>
-                  <div className="stat-desc text-gray-400">Real-time from Intuition API</div>
+                  <div className="stat-title text-gray-600">Current Transactions</div>
+                  <div className="stat-value text-gray-800">{formatLargeNumber(currentTransactions.toString())}</div>
+                  <div className="stat-desc text-gray-500">Real-time from Intuition API</div>
                 </div>
               </div>
 
@@ -454,45 +455,58 @@ const Home: NextPage = () => {
         </div>
 
         {/* Betting Interface */}
-        <div className="card bg-gray-700 shadow-xl mb-8 border border-gray-600">
+        <div className="card bg-white shadow-xl mb-8 border border-gray-200">
           <div className="card-body">
-            <h2 className="card-title text-2xl mb-4 text-gray-100">💰 Place Your Bet</h2>
+            <h2 className="card-title text-2xl mb-4 text-gray-800">💰 Place Your Bet</h2>
             
             <div className="grid md:grid-cols-3 gap-4">
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-semibold text-gray-200">Select Market</span>
+                  <span className="label-text font-semibold text-gray-700">Select Market</span>
                 </label>
                 <select 
-                  className="select select-bordered bg-gray-600 border-gray-500 text-gray-100 focus:border-gray-400"
+                  key={`market-select-${refreshKey}-${markets.length}`} // Force re-render when markets data changes
+                  className="select select-bordered bg-gray-50 border-gray-300 text-gray-800 focus:border-gray-500"
                   value={selectedMarket}
                   onChange={(e) => {
                     console.log("🔄 Market selected:", e.target.value);
-                    console.log("🔍 Available markets from Factory:", allMarkets);
+                    console.log("🔍 Available markets from Ponder:", markets);
                     setSelectedMarket(e.target.value);
                   }}
                 >
                   <option value="">Choose a market...</option>
-                  {allMarkets?.map((marketAddress, idx) => {
-                    const market = markets.find(m => m.address === marketAddress);
+                  {markets.map((market, idx) => {
+                    console.log(`🔍 Dropdown render for ${market.address.slice(0, 10)}:`, {
+                      threshold: market.threshold.toString(),
+                      description: market.description,
+                      aboveBets: market.aboveBets.toString(),
+                      belowBets: market.belowBets.toString(),
+                      fullMarket: market
+                    });
                     return (
-                      <option key={idx} value={marketAddress}>
-                        {market ? `Threshold: ${formatLargeNumber(market.threshold.toString())} (${marketAddress.slice(0, 10)}...)` : `Market ${marketAddress.slice(0, 10)}...`}
+                      <option key={`${market.address}-${refreshKey}`} value={market.address}>
+                        {`${market.description} - Threshold: ${formatLargeNumber(market.threshold.toString())}`}
                       </option>
                     );
                   })}
                 </select>
                 
                 {/* DEBUG INFO */}
-                <div className="text-xs text-gray-400 mt-2">
-                  <div>🔍 Factory Markets: {allMarkets?.length || 0} available</div>
-                  {allMarkets?.length === 0 && (
-                    <div className="text-yellow-400">⚠️ No markets from Factory - create one first</div>
+                <div className="text-xs text-gray-500 mt-2">
+                  <div>🔍 Ponder Markets: {markets.length} available</div>
+                  {isPonderLoading && (
+                    <div className="text-blue-600">🔄 Loading from Ponder...</div>
+                  )}
+                  {markets.length === 0 && !isPonderLoading && (
+                    <div className="text-orange-600">⚠️ No markets from Ponder - create one first</div>
+                  )}
+                  {ponderError && (
+                    <div className="text-red-600">❌ Ponder Error: {ponderError.message}</div>
                   )}
                   {selectedMarket && (
                     <div className="mt-1">
                       <div>✅ Selected: {selectedMarket}</div>
-                      <div>✅ Valid: {allMarkets?.includes(selectedMarket) ? "Yes" : "❌ NO - Invalid market!"}</div>
+                      <div>✅ Valid: {markets.find(m => m.address === selectedMarket) ? "Yes" : "❌ NO - Invalid market!"}</div>
                     </div>
                   )}
                 </div>
@@ -500,17 +514,17 @@ const Home: NextPage = () => {
 
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-semibold text-gray-200">Your Prediction</span>
+                  <span className="label-text font-semibold text-gray-700">Your Prediction</span>
                 </label>
                 <div className="btn-group">
                   <button 
-                    className={`btn ${betType === 0 ? 'bg-gray-500 border-gray-500 text-gray-100' : 'btn-outline border-gray-500 text-gray-300 hover:bg-gray-600 hover:border-gray-400'}`}
+                    className={`btn ${betType === 0 ? 'bg-green-600 border-green-600 text-white hover:bg-green-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-green-600 hover:text-white hover:border-green-600'} transition-all duration-200`}
                     onClick={() => setBetType(0)}
                   >
                     📈 ABOVE
                   </button>
                   <button 
-                    className={`btn ${betType === 1 ? 'bg-gray-500 border-gray-500 text-gray-100' : 'btn-outline border-gray-500 text-gray-300 hover:bg-gray-600 hover:border-gray-400'}`}
+                    className={`btn ${betType === 1 ? 'bg-red-600 border-red-600 text-white hover:bg-red-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-red-600 hover:text-white hover:border-red-600'} transition-all duration-200`}
                     onClick={() => setBetType(1)}
                   >
                     📉 BELOW
@@ -520,7 +534,7 @@ const Home: NextPage = () => {
 
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-semibold text-gray-200">Bet Amount (ETH)</span>
+                  <span className="label-text font-semibold text-gray-700">Bet Amount (ETH)</span>
                 </label>
                 <EtherInput
                   value={betAmount}
@@ -531,96 +545,128 @@ const Home: NextPage = () => {
             </div>
 
             <button 
-              className="btn bg-gray-500 hover:bg-gray-400 text-gray-100 border-gray-500 hover:border-gray-400 btn-block mt-4"
+              className="btn bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:scale-105 text-white border-blue-600 hover:border-blue-700 btn-block mt-4 transition-all duration-200 font-bold"
               onClick={placeBet}
               disabled={!selectedMarket || !betAmount}
             >
               🎯 Place Real Bet (Any Market)
             </button>
 
-            <div className="alert bg-gray-600 border-gray-500 mt-4">
+            <div className="alert bg-gray-100 border-gray-300 mt-4">
               <div>
-                <strong className="text-gray-100">✅ Can bet on ANY TransactionPredictionMarket address!</strong>
+                <strong className="text-gray-800">✅ Can bet on ANY TransactionPredictionMarket address!</strong>
                 <br />
-                <span className="text-gray-300">This interface validates each bet against the Factory's market list and calls the contract directly.</span>
+                <span className="text-gray-600">This interface validates each bet against the Factory's market list and calls the contract directly.</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Active Markets List */}
-        <div className="card bg-gray-700 shadow-xl border border-gray-600">
+        <div className="card bg-white shadow-xl border border-gray-200">
           <div className="card-body">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="card-title text-2xl text-gray-100">🏪 Active Markets</h2>
-              <button 
-                className="btn btn-sm bg-gray-500 hover:bg-gray-400 text-gray-100 border-gray-500 hover:border-gray-400"
-                onClick={() => {
-                  console.log("🔄 Debug: Current markets state:", markets);
-                  console.log("🔄 Debug: All market addresses from Factory:", allMarkets);
-                  // Force re-render by clearing and refreshing
-                  setMarkets([]);
-                  setTimeout(() => refetchMarkets(), 500);
-                }}
-              >
-                🔄 Debug Refresh
-              </button>
+              <h2 className="card-title text-2xl text-gray-800">🏪 Active Markets</h2>
+              <div className="flex gap-2">
+                <button 
+                  className="btn btn-sm bg-red-600 hover:bg-red-700 hover:scale-105 text-white border-red-600 hover:border-red-700 transition-all duration-200"
+                  onClick={() => {
+                    console.log("🧹 CLEARING OLD MARKETS");
+                    setMarkets([]);
+                    setSelectedMarket("");
+                    notification.warning("Anciens marchés supprimés. Créez un nouveau TransactionPredictionMarket!");
+                  }}
+                >
+                  🧹 Clear Old Markets
+                </button>
+                <button 
+                  className="btn btn-sm bg-gray-200 hover:bg-gray-700 hover:text-white text-gray-700 border-gray-400 hover:shadow-md transition-all duration-200"
+                  onClick={() => {
+                    console.log("🔄 Debug: Current markets state:", markets);
+                    console.log("🔄 Debug: Ponder data:", ponderData);
+                    // Force re-render by refreshing Ponder
+                    setMarkets([]);
+                    setTimeout(() => refetchPonder(), 500);
+                  }}
+                >
+                  🔄 Debug Refresh Ponder
+                </button>
+              </div>
             </div>
             
             {markets.length === 0 ? (
               <div className="text-center py-8">
-                <div className="loading loading-spinner loading-lg mb-4 text-gray-400"></div>
-                <p className="text-lg text-gray-200">Loading markets from Factory...</p>
-                <p className="text-sm text-gray-400">Factory Markets: {allMarkets?.length || 0}</p>
+                {isPonderLoading ? (
+                  <>
+                    <div className="loading loading-spinner loading-lg mb-4 text-blue-500"></div>
+                    <p className="text-lg text-gray-700">Loading markets from Ponder...</p>
+                    <p className="text-sm text-gray-500">GraphQL Query in progress</p>
+                  </>
+                ) : ponderError ? (
+                  <>
+                    <div className="text-red-500 text-2xl mb-4">❌</div>
+                    <p className="text-lg text-red-700">Error loading from Ponder</p>
+                    <p className="text-sm text-red-500">{ponderError.message}</p>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-gray-400 text-2xl mb-4">📭</div>
+                    <p className="text-lg text-gray-700">No markets found</p>
+                    <p className="text-sm text-gray-500">Create your first market above!</p>
+                  </>
+                )}
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div key={`markets-table-${refreshKey}`} className="overflow-x-auto">
                 <table className="table">
                   <thead>
-                    <tr className="border-gray-600">
-                      <th className="text-gray-300">Market</th>
-                      <th className="text-gray-300">Threshold</th>
-                      <th className="text-gray-300">Deadline</th>
-                      <th className="text-gray-300">Total Locked</th>
-                      <th className="text-gray-300">Above Bets</th>
-                      <th className="text-gray-300">Below Bets</th>
-                      <th className="text-gray-300">Status</th>
+                    <tr className="border-gray-200">
+                      <th className="text-gray-600">Market</th>
+                      <th className="text-gray-600">Threshold</th>
+                      <th className="text-gray-600">Deadline</th>
+                      <th className="text-gray-600">Total Locked</th>
+                      <th className="text-gray-600">Above Bets</th>
+                      <th className="text-gray-600">Below Bets</th>
+                      <th className="text-gray-600">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {markets.map((market, idx) => (
-                      <tr key={idx} className="border-gray-600 hover:bg-gray-600">
+                      <tr key={idx} className="border-gray-200 hover:bg-gray-50">
                         <td>
-                          <div className="font-mono text-sm text-gray-200">
+                          <div className="font-mono text-sm text-gray-900">
                             {market.address.slice(0, 10)}...
                           </div>
-                          <div className="text-xs text-gray-400">
-                            ✅ Real data from factory contract
+                          <div className="text-xs text-gray-600 max-w-xs truncate">
+                            {market.description}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            ✅ Indexed by Ponder GraphQL
                           </div>
                         </td>
-                        <td className="font-semibold text-gray-100">
+                        <td className="font-semibold text-gray-900">
                           {formatLargeNumber(market.threshold.toString())}
                         </td>
-                        <td className="text-gray-200">
+                        <td className="text-gray-900">
                           {formatTimestamp(Number(market.deadline) * 1000)}
                         </td>
                         <td>
-                          <span className="font-semibold text-gray-200">
+                          <span className="font-semibold text-gray-900">
                             {formatEther(market.totalValueLocked)} ETH
                           </span>
                         </td>
                         <td>
-                          <span className="text-gray-300">
+                          <span className="text-gray-900">
                             {formatEther(market.aboveBets)} ETH
                           </span>
                         </td>
                         <td>
-                          <span className="text-gray-300">
+                          <span className="text-gray-900">
                             {formatEther(market.belowBets)} ETH
                           </span>
                         </td>
                         <td>
-                          <span className={`badge ${market.status === 0 ? 'bg-gray-500 text-gray-100' : 'bg-gray-600 text-gray-200'}`}>
+                          <span className={`badge ${market.status === 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                             {market.status === 0 ? 'Active' : 'Resolved'}
                           </span>
                         </td>
